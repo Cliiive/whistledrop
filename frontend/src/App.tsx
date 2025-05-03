@@ -10,7 +10,7 @@ const App = () => {
       .then(data => setMessage(data.message));
   }, []);
 
-  return <div className="container">{message ? <h1>{message}</h1> : <p>Loading...</p>}</div>;
+  return <div className="container">{message ? <p>{message}</p> : <p>Loading...</p>}</div>;
 };
 
 export default App;
