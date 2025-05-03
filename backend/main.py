@@ -1,8 +1,18 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-import os
 
+# For connection between React and FastAPI (Cross-Origin Resource Sharing)
+from fastapi.middleware.cors import CORSMiddleware
+
+# For AES encryption
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+# For PostgreSQL connection
+import psycopg2
+from sqlalchemy import create_engine
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
 app = FastAPI()
 
 # Allow React frontend to talk to FastAPI backend
@@ -14,9 +24,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@app.get("/api/v1/db/test")
+async def test_db():
+    database_url = os.environ.get("DATABASE_URL")
+    print(database_url)
+    engine = create_engine(database_url)
+    with engine.connect() as connection:
+        if connection:
+            print("Successfully connected to the database")
+            return {"message": "Successfully connected to the database"}
+        else:
+            print("Failed to connect to the database")
+            return {"message": "Failed to connect to the database"}
 
 
 @app.get("/api/v1")

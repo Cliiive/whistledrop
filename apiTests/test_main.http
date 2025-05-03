@@ -9,3 +9,8 @@ GET http://127.0.0.1:8000/api/v1
 Accept: application/json
 
 ###
+
+###
+
+GET http://127.0.0.1:8000/api/v1/db/test
+Accept: application/json
