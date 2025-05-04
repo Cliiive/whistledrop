@@ -46,7 +46,7 @@ async def test_response():
 
         # TODO: Encypt + Store the key in a secure way
 
-        nonve, cypher = encrypt_pdf("./test.pdf", aes_key)
+        nonce, cypher = encrypt_pdf("/app/test.pdf", aes_key)
 
         # TODO: Store the encrypted PDF in a secure way
 
