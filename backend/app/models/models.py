@@ -9,7 +9,7 @@ class SymmetricalKey(Base):
     __tablename__ = 'symmetrical_keys'
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    file_id = Column(UUID, ForeignKey('files.id'), nullable=False)
+    file_id = Column(UUID(as_uuid=True), ForeignKey('files.id', ondelete='CASCADE'), nullable=False)
     nonce = Column(LargeBinary, nullable=False) # 'number used once'
     key = Column(LargeBinary, nullable=False)
 
@@ -24,7 +24,7 @@ class File(Base):
     __tablename__ = 'files'
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID, ForeignKey('users.id'), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     path = Column(VARCHAR(255), nullable=False)
     file_name = Column(VARCHAR(255), nullable=False)
     content_type = Column(VARCHAR(100), nullable=False)

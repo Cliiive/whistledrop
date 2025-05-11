@@ -6,14 +6,16 @@ from app.api.v1.user import router as user_router
 from app.api.v1.upload import router as upload_router
 
 from app.db.session import create_tables
+app = FastAPI()
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Code to run on startup
-    create_tables() # only for development
-    yield
-    # Code to run on shutdown
-app = FastAPI(lifespan=lifespan)
+@app.on_event("startup")
+async def startup_event():
+    print("App starting up...")
+    try:
+        create_tables()
+        print("Tables created successfully")
+    except Exception as e:
+        print(f"Fehler beim Erstellen der Tabellen: {e}")
 
 # CORS middleware
 app.add_middleware(

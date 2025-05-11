@@ -2,10 +2,9 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import UUID
-from ..models.models import SymmetricalKey, File
+from ..models.models import SymmetricalKey, File, User
 import uuid
 import os
-
 from fastapi import UploadFile
 FILE_PATH = "/app/storage/uploads/"  # Path to save the uploaded files
 
@@ -15,20 +14,14 @@ class EncryptedFileResult(BaseModel):
     nonce: bytes
     key: bytes
 
-def gen_aesgcm() -> AESGCM:
-    # Generates a cryptographically secure 256-bit key
-    key: bytes = AESGCM.generate_key(256)
-    print("New aesgcm key generated")
-    return AESGCM(key)
-
 def encrypt_pdf(file: UploadFile) -> EncryptedFileResult:
     key = AESGCM.generate_key(256)
     aesgcm = AESGCM(key)
+    plaintext = file.file.read()
 
-    plain_data = file.read()
     nonce = os.urandom(12)
 
-    ciphertext = aesgcm.encrypt(nonce, plain_data, associated_data=None)
+    ciphertext = aesgcm.encrypt(nonce, plaintext, associated_data=None)
 
     return EncryptedFileResult(
         file_name=file.filename,
@@ -41,16 +34,33 @@ def save_encrypted_file(db: Session, file_name: str, ciphertext: bytes) -> UUID:
     file_path = os.path.join(FILE_PATH, file_name)
 
     # TODO: Uses a raondom UUID for the user_id, replace with actual user_id
-    db_file = File(user_id=uuid.uuid4(), path=file_path, file_name=file_name, content_type="application/pdf")
+    user_id = insert_random_user(db)
+    db_file = File(user_id=user_id, path=file_path, file_name=file_name, content_type="application/pdf")
 
     # Save the encrypted file to the database
     db.add(db_file)
     db.commit()
     db.refresh(db_file)
+
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    counter = 0
+    new_file_path = file_path
+    while os.path.exists(new_file_path):
+        counter += 1
+        name, ext = os.path.splitext(file_path)
+        new_file_path = f"{name}_{counter}{ext}"
+
+    if new_file_path != file_path:
+        db_file.path = new_file_path
+        db.commit()
+        file_path = new_file_path
+
+    # Datei schreiben
     with open(file_path, "wb") as f:
         f.write(ciphertext)
 
-    print(f"File saved to {file_path}")
+    print(f"Datei gespeichert unter {file_path}")
 
     return db_file.id
 
@@ -69,3 +79,14 @@ def encrypt_aes_key(aes_key: bytes) -> bytes:
     # You would use a public key encryption algorithm here
     return aes_key  # Replace with actual encrypted key
 
+# only for testing purposes
+def insert_random_user(db: Session) -> UUID:
+    # Insert a random user into the database
+    # This is a placeholder for the actual user insertion logic
+    # You would use a user creation function here
+    user = User(alias="test_user")
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    print(f"Inserted random user with ID {user.id}")
+    return user.id
