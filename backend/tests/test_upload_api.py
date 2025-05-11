@@ -1,9 +1,13 @@
 # backend/tests/test_upload_api.py
 import pytest
+from fastapi import UploadFile
 from fastapi.testclient import TestClient
+
+from app.services.file_upload_handler import encrypt_pdf, save_encrypted_file, save_aesgcm_key
 from main import app
 import uuid
 import io
+import os
 
 client = TestClient(app)
 
@@ -34,8 +38,10 @@ def test_encrypt_pdf():
     test_file = io.BytesIO(test_content)
     test_file.filename = "test_encrypt.pdf"
 
+    file = UploadFile(file=test_file, filename="test_encrypt.pdf")
+
     # Funktion aufrufen
-    result = encrypt_pdf(test_file)
+    result = encrypt_pdf(file)
 
     # Überprüfungen
     assert result.file_name == "test_encrypt.pdf"
@@ -121,8 +127,7 @@ def test_upload_unsupported_file_type(mocker):
         files={"file": ("test.txt", test_file, "text/plain")}
     )
 
-    # Überprüfungen - je nach Implementierung sollte hier ein Fehler zurückgegeben werden
-    assert response.status_code != 200  # Annahme: nicht unterstützte Dateitypen werden abgelehnt
+    assert response.status_code == 415
 
 
 def test_upload_duplicate_filename(mocker):

@@ -31,11 +31,17 @@ def encrypt_pdf(file: UploadFile) -> EncryptedFileResult:
     )
 
 def save_encrypted_file(db: Session, file_name: str, ciphertext: bytes) -> UUID:
+
+    file_name = file_name.split(".")[0] + "_encrypted"
     file_path = os.path.join(FILE_PATH, file_name)
 
     # TODO: Uses a raondom UUID for the user_id, replace with actual user_id
     user_id = insert_random_user(db)
-    db_file = File(user_id=user_id, path=file_path, file_name=file_name, content_type="application/pdf")
+    db_file = File(id=uuid.uuid4(),
+                   user_id=user_id,
+                   path=file_path,
+                   file_name=file_name,
+                   content_type="application/pdf")
 
     # Save the encrypted file to the database
     db.add(db_file)
@@ -78,6 +84,13 @@ def encrypt_aes_key(aes_key: bytes) -> bytes:
     # This is a placeholder for the actual encryption logic
     # You would use a public key encryption algorithm here
     return aes_key  # Replace with actual encrypted key
+
+def allowed_type(file: UploadFile) -> bool:
+    # Check if the file is a PDF
+    if file.content_type != "application/pdf":
+        print("Invalid file type. Only PDF files are allowed.")
+        return False
+    return True
 
 # only for testing purposes
 def insert_random_user(db: Session) -> UUID:
