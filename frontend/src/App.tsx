@@ -1,16 +1,37 @@
-import { useState, useEffect } from 'react';
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+// Import ohne Dateiendung (das war der Fehler)
+import UploadPage from './pages/UploadPage';
+import './App.css';
 
-const App = () => {
-  const [message, setMessage] = useState<string>('');
+// Korrigierte ProtectedRoute-Komponente
+const ProtectedRoute = ({ element }: { element: React.ReactElement }) => {
+  const isAuthenticated = localStorage.getItem('accessToken') !== null;
+  return isAuthenticated ? element : <Navigate to="/" replace />;
+};
 
-  useEffect(() => {
-    fetch('http://localhost:8000/api/v1')
-      .then(response => response.json())
-      .then(data => setMessage(data.message));
-  }, []);
-
-  return <div className="container">{message ? <p>{message}</p> : <p>Loading...</p>}</div>;
+const App: React.FC = () => {
+  return (
+    <Router>
+      <div className="app">
+        <main className="app-content">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route 
+              path="/upload" 
+              element={<ProtectedRoute element={<UploadPage />} />} 
+            />
+            {/* Fallback für alle nicht definierten Routen */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+        <footer className="app-footer">
+          <p>&copy; {new Date().getFullYear()} WhistleDrop - Sicherer Datenaustausch für Whistleblower</p>
+        </footer>
+      </div>
+    </Router>
+  );
 };
 
 export default App;
