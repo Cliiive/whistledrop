@@ -8,9 +8,7 @@ import uuid
 def authenticate_user(db: Session, passphrase: str):
     # Alle Benutzer abrufen
     users = db.query(User).all()
-    print(users.__len__())
     for user in users:
-        print(user.passphrase_hash)
         if user.passphrase_hash and verify_passphrase(passphrase, user.passphrase_hash):
             return user
 

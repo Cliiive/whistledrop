@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import Depends, HTTPException, status
-from fastapi.security import APIKeyCookie
+from fastapi import Depends, HTTPException, status, Security
+from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
@@ -13,7 +13,7 @@ import os
 
 
 # Cookie-basierter Zugriffstoken-Handler (statt OAuth2PasswordBearer)
-cookie_scheme = APIKeyCookie(name="access_token", auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -23,7 +23,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-def get_current_user(token: str = Depends(cookie_scheme), db: Session = Depends(get_db_session)) -> User:
+def get_current_user(token: str = Security(oauth2_scheme), db: Session = Depends(get_db_session)) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Ungültiger Authentifizierungstoken",

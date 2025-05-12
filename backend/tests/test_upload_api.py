@@ -14,8 +14,8 @@ client = TestClient(app)
 
 def test_upload_endpoint(mocker):
     # Mock für Datenbankfunktionen
-    mocker.patch("app.services.file_upload_handler.save_encrypted_file", return_value=uuid.uuid4())
-    mocker.patch("app.services.file_upload_handler.save_aesgcm_key")
+    mocker.patch("app.services.file_upload_service.save_encrypted_file", return_value=uuid.uuid4())
+    mocker.patch("app.services.file_upload_service.save_aesgcm_key")
 
     # Testdatei erstellen
     test_file = io.BytesIO(b"Test PDF content")
@@ -66,10 +66,10 @@ def test_save_encrypted_file(mocker):
     mocker.patch("os.path.exists", return_value=False)
 
     # Mock für die Benutzereinführung
-    mocker.patch("app.services.file_upload_handler.insert_random_user", return_value=uuid.uuid4())
+    mocker.patch("app.services.file_upload_service.insert_random_user", return_value=uuid.uuid4())
 
     # Funktion aufrufen
-    file_id = save_encrypted_file(mock_db, "test_file.pdf", b"encrypted_content")
+    file_id = save_encrypted_file(mock_db, "test_file.pdf", b"encrypted_content", uuid.uuid4())
 
     # Überprüfungen
     assert isinstance(file_id, uuid.UUID)
@@ -101,8 +101,8 @@ def test_save_aesgcm_key(mocker):
 # Edge Cases
 def test_upload_empty_file(mocker):
     # Mocks konfigurieren
-    mocker.patch("app.services.file_upload_handler.save_encrypted_file", return_value=uuid.uuid4())
-    mocker.patch("app.services.file_upload_handler.save_aesgcm_key")
+    mocker.patch("app.services.file_upload_service.save_encrypted_file", return_value=uuid.uuid4())
+    mocker.patch("app.services.file_upload_service.save_aesgcm_key")
 
     # Leere Datei erstellen
     empty_file = io.BytesIO(b"")
@@ -140,7 +140,7 @@ def test_upload_duplicate_filename(mocker):
     # Datenbankoperationen mocken
     mock_db = mocker.MagicMock()
     file_id = uuid.uuid4()
-    mocker.patch("app.services.file_upload_handler.insert_random_user", return_value=uuid.uuid4())
+    mocker.patch("app.services.file_upload_service.insert_random_user", return_value=uuid.uuid4())
 
     # Funktion direkt aufrufen
     result = save_encrypted_file(mock_db, "duplicate.pdf", b"content")

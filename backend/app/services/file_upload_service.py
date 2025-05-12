@@ -2,7 +2,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import UUID
-from ..models.models import SymmetricalKey, File, User
+from ..models.models import SymmetricalKey, File, User, PublicKey
 import uuid
 import os
 from fastapi import UploadFile
@@ -30,15 +30,14 @@ def encrypt_pdf(file: UploadFile) -> EncryptedFileResult:
         key=key
     )
 
-def save_encrypted_file(db: Session, file_name: str, ciphertext: bytes) -> UUID:
+def save_encrypted_file(db: Session, file_name: str, ciphertext: bytes, user_id: UUID, symetricla_key_id: UUID) -> UUID:
 
     file_name = file_name.split(".")[0] + "_encrypted"
     file_path = os.path.join(settings.FILE_PATH, file_name)
 
-    # TODO: Uses a raondom UUID for the user_id, replace with actual user_id
-    user_id = insert_random_user(db)
     db_file = File(id=uuid.uuid4(),
                    user_id=user_id,
+                   symetrical_key_id=symetricla_key_id,
                    path=file_path,
                    file_name=file_name,
                    content_type="application/pdf")
@@ -70,20 +69,28 @@ def save_encrypted_file(db: Session, file_name: str, ciphertext: bytes) -> UUID:
 
     return db_file.id
 
-def save_aesgcm_key(db: Session, aes_key: bytes, file_id: UUID, nonce: bytes) -> None:
+def save_aesgcm_key(db: Session, aes_key: bytes, public_key_id: UUID, nonce: bytes) -> UUID:
     # Speichere den AESGCM Schlüssel sicher
-    db_key = SymmetricalKey(key=aes_key, file_id=file_id, nonce=nonce)
+    db_key = SymmetricalKey(key=aes_key, public_key_id=public_key_id, nonce=nonce)
     db.add(db_key)
     db.commit()
     db.refresh(db_key)
-    print(f"AESGCM key saved for file ID {file_id}")
+    return db_key.id
+    print(f"Key saved with ID {db_key.id}")
 
 
-def encrypt_aes_key(aes_key: bytes) -> bytes:
+def encrypt_aes_key(db: Session, aes_key: bytes) -> tuple[bytes, UUID]:
     # Encrypt the AES key with the public key
     # This is a placeholder for the actual encryption logic
     # You would use a public key encryption algorithm here
-    return aes_key  # Replace with actual encrypted key
+
+    # TODO: Placeholder for public key encryption
+    pub_key = PublicKey(active=True, key=bytes(0x1))  # Placeholder for the public key
+    db.add(pub_key)
+    db.commit()
+    db.refresh(pub_key)
+
+    return aes_key, pub_key.id  # TODO: Implement actual encryption logic
 
 def allowed_type(file: UploadFile) -> bool:
     # Check if the file is a PDF
