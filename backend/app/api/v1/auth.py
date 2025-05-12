@@ -9,17 +9,17 @@ from app.core.auth import create_access_token
 router = APIRouter()
 
 
-class SeedPhraseRequest(BaseModel):
-    seed_phrase: str
+class PassphraseRequest(BaseModel):
+    passphrase: str
 
 @router.post("/login")
-async def login(request: SeedPhraseRequest, db: Session = Depends(get_db_session)):
-    user = authenticate_user(db, request.seed_phrase)
+async def login(request: PassphraseRequest, db: Session = Depends(get_db_session)):
+    user = authenticate_user(db, request.passphrase)
 
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Ungültige Seed-Phrase"
+            detail="Invalid Passphrase"
         )
 
     # JWT-Token erstellen
@@ -28,7 +28,6 @@ async def login(request: SeedPhraseRequest, db: Session = Depends(get_db_session
     return {
         "message": "Erfolgreich eingeloggt",
         "user_id": str(user.id),
-        "alias": user.alias,
         "access_token": access_token,
         "token_type": "bearer"
     }
@@ -37,7 +36,7 @@ async def login(request: SeedPhraseRequest, db: Session = Depends(get_db_session
 @router.get("/register")
 async def register_user(db: Session = Depends(get_db_session)):
     # Erstelle den Benutzer
-    user, seed_phrase = create_user(db)
+    user, passphrase = create_user(db)
 
     # JWT-Token erstellen
     access_token = create_access_token(data={"sub": str(user.id)})
@@ -46,7 +45,7 @@ async def register_user(db: Session = Depends(get_db_session)):
     return {
         "message": "Benutzer erfolgreich erstellt",
         "user_id": str(user.id),
-        "seed_phrase": seed_phrase,  # Diese muss der Benutzer sicher aufbewahren
+        "passphrase": passphrase,  # Diese muss der Benutzer sicher aufbewahren
         "access_token": access_token,
         "token_type": "bearer"
     }

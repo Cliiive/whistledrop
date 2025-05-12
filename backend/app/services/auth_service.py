@@ -1,18 +1,17 @@
 # backend/app/services/auth_service.py
 from sqlalchemy.orm import Session
 from app.models.models import User
-from app.core.security import verify_seed_phrase, hash_seed_phrase, generate_seed_phrase
+from app.core.security import verify_passphrase, hash_passphrase, generate_passphrase
 
 import uuid
 
-def authenticate_user(db: Session, seed_phrase: str):
-    """Authentifiziert einen Benutzer anhand der Seed-Phrase."""
+def authenticate_user(db: Session, passphrase: str):
     # Alle Benutzer abrufen
     users = db.query(User).all()
     print(users.__len__())
     for user in users:
-        print(user.phrase_hash)
-        if user.phrase_hash and verify_seed_phrase(seed_phrase, user.phrase_hash):
+        print(user.passphrase_hash)
+        if user.passphrase_hash and verify_passphrase(passphrase, user.passphrase_hash):
             return user
 
     return None
@@ -21,17 +20,17 @@ def authenticate_user(db: Session, seed_phrase: str):
 def create_user(db: Session):
     """Erstellt einen neuen Benutzer mit einer generierten Seed-Phrase."""
     # Generiere eine Seed-Phrase
-    seed_phrase = generate_seed_phrase()
+    passphrase = generate_passphrase()
 
     # Erstelle einen neuen Benutzer
     user = User(
         id=uuid.uuid4(),
-        phrase_hash=hash_seed_phrase(seed_phrase)
+        passphrase_hash=hash_passphrase(passphrase)
     )
 
     db.add(user)
     db.commit()
     db.refresh(user)
 
-    # Gib den Benutzer und die Seed-Phrase zurück
-    return user, seed_phrase
+    # Gib den Benutzer und die passphrase zurück
+    return user, passphrase

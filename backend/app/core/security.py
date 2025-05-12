@@ -5,16 +5,16 @@ from faker import Faker
 
 faker = Faker()
 
-def generate_seed_phrase(length=4):
+def generate_passphrase(length=4):
     seed_phrase = ' '.join(faker.words(nb=8))
     return seed_phrase
 
-def hash_seed_phrase(seed_phrase):
+def hash_passphrase(seed_phrase):
     salt = secrets.token_hex(16)
     hash_obj = hashlib.sha256((seed_phrase + salt).encode())
     return f"{salt}${hash_obj.hexdigest()}"
 
-def verify_seed_phrase(input_phrase, stored_hash):
+def verify_passphrase(input_phrase, stored_hash):
     if not stored_hash or "$" not in stored_hash:
         return False
 
