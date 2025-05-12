@@ -11,14 +11,6 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
 
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 def create_tables():
     """Create all tables in the database."""
     print("Creating tables...")
@@ -28,3 +20,10 @@ def create_tables():
     conn.close()
     # Base.metadata.create_all(engine)
     Base.metadata.create_all(bind=engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

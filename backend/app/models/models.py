@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import ForeignKey, Boolean, VARCHAR, UUID
+from sqlalchemy import ForeignKey, Boolean, VARCHAR, UUID, TIMESTAMP, func
 from sqlalchemy import Column, Integer, LargeBinary
 import uuid
 Base = declarative_base()
@@ -33,4 +33,5 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    alias = Column(VARCHAR(255), nullable=False)
+    phrase_hash = Column(VARCHAR(255), nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)

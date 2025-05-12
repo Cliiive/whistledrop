@@ -19,3 +19,18 @@ Accept: application/json
 
 GET http://127.0.0.1:8000/api/v1/upload
 Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/api/v1/auth/register
+Accept: application/json
+
+###
+
+POST http://127.0.0.1:8000/api/v1/auth/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "seed_phrase": "operation role training clear many year ever audience"
+}

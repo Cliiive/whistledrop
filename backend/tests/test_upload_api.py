@@ -3,7 +3,7 @@ import pytest
 from fastapi import UploadFile
 from fastapi.testclient import TestClient
 
-from app.services.file_upload_handler import encrypt_pdf, save_encrypted_file, save_aesgcm_key
+from app.services.file_upload_service import encrypt_pdf, save_encrypted_file, save_aesgcm_key
 from main import app
 import uuid
 import io

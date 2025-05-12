@@ -6,7 +6,7 @@ from ..models.models import SymmetricalKey, File, User
 import uuid
 import os
 from fastapi import UploadFile
-FILE_PATH = "/app/storage/uploads/"  # Path to save the uploaded files
+from app.core.config import settings
 
 class EncryptedFileResult(BaseModel):
     file_name: str
@@ -33,7 +33,7 @@ def encrypt_pdf(file: UploadFile) -> EncryptedFileResult:
 def save_encrypted_file(db: Session, file_name: str, ciphertext: bytes) -> UUID:
 
     file_name = file_name.split(".")[0] + "_encrypted"
-    file_path = os.path.join(FILE_PATH, file_name)
+    file_path = os.path.join(settings.FILE_PATH, file_name)
 
     # TODO: Uses a raondom UUID for the user_id, replace with actual user_id
     user_id = insert_random_user(db)
