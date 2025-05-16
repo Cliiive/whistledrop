@@ -1,37 +1,47 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
-// Import ohne Dateiendung (das war der Fehler)
 import UploadPage from './pages/UploadPage';
-import './App.css';
+import { AuthProvider } from './context/AuthContext';
 
-// Korrigierte ProtectedRoute-Komponente
-const ProtectedRoute = ({ element }: { element: React.ReactElement }) => {
-  const isAuthenticated = localStorage.getItem('accessToken') !== null;
-  return isAuthenticated ? element : <Navigate to="/" replace />;
+// Protected Route Komponente, die prüft, ob der Benutzer eingeloggt ist
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  // Wir führen jetzt eine Prüfung auf window-Ebene durch, ob der Auth-Context einen Token hat
+  // Falls nicht, leiten wir zur Landing Page um
+  const isAuthenticated = window.__WHISTLEDROP_AUTH_TOKEN__ !== undefined;
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return <>{children}</>;
 };
 
-const App: React.FC = () => {
+function App() {
   return (
-    <Router>
-      <div className="app">
-        <main className="app-content">
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route 
-              path="/upload" 
-              element={<ProtectedRoute element={<UploadPage />} />} 
-            />
-            {/* Fallback für alle nicht definierten Routen */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-        <footer className="app-footer">
-          <p>&copy; {new Date().getFullYear()} WhistleDrop - Sicherer Datenaustausch für Whistleblower</p>
-        </footer>
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route 
+            path="/upload" 
+            element={
+              <ProtectedRoute>
+                <UploadPage />
+              </ProtectedRoute>
+            } 
+          />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
-};
+}
 
 export default App;
+
+// Ergänze die globale Typendefinition
+declare global {
+  interface Window {
+    __WHISTLEDROP_AUTH_TOKEN__?: string;
+  }
+}

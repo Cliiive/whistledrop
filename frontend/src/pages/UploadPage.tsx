@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Button from '../components/Button';
-import InputField from '../components/InputField';
 
 const UploadPage: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -21,7 +20,7 @@ const UploadPage: React.FC = () => {
 
   const fetchUploadedFiles = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
+      const token = window.__WHISTLEDROP_AUTH_TOKEN__;
       const response = await fetch('http://127.0.0.1:8000/api/v1/upload/', {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -61,7 +60,7 @@ const UploadPage: React.FC = () => {
     setUploadError(null);
     
     try {
-      const token = localStorage.getItem('accessToken');
+      const token = window.__WHISTLEDROP_AUTH_TOKEN__;
       // Vollständige URL für den Upload-Endpunkt
       const response = await fetch('http://127.0.0.1:8000/api/v1/upload/', {
         method: 'POST',
@@ -128,7 +127,7 @@ const UploadPage: React.FC = () => {
     
     setDeleting(true);
     try {
-      const token = localStorage.getItem('accessToken');
+      const token = window.__WHISTLEDROP_AUTH_TOKEN__;
       const response = await fetch(`http://127.0.0.1:8000/api/v1/upload/${fileToDelete.id}`, {
         method: 'DELETE',
         headers: {

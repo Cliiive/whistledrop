@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
 import InputField from '../components/InputField';
+import { useAuth } from '../context/AuthContext';
 
 const LandingPage: React.FC = () => {
   const [passphrase, setPassphrase] = useState('');
@@ -10,6 +11,7 @@ const LandingPage: React.FC = () => {
   const [showGeneratedPassphrase, setShowGeneratedPassphrase] = useState(false);
   const [generatedPassphrase, setGeneratedPassphrase] = useState('');
   const navigate = useNavigate();
+  const { setAccessToken } = useAuth();
 
   const handlePassphraseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassphrase(e.target.value);
@@ -24,7 +26,6 @@ const LandingPage: React.FC = () => {
     
     setIsLoading(true);
     try {
-      // Hier würde normalerweise ein API-Aufruf stattfinden
       const response = await fetch('http://127.0.0.1:8000/api/v1/auth/login', {
         method: 'POST',
         headers: {
@@ -38,8 +39,10 @@ const LandingPage: React.FC = () => {
       }
       
       const data = await response.json();
-      // Speichern des Access Tokens, zum Beispiel in localStorage
-      localStorage.setItem('accessToken', data.access_token);
+      
+      // Token im RAM speichern statt localStorage
+      setAccessToken(data.access_token);
+      window.__WHISTLEDROP_AUTH_TOKEN__ = data.access_token;
       
       // Weiterleitung zur Upload-Seite
       navigate('/upload');
@@ -66,10 +69,9 @@ const LandingPage: React.FC = () => {
       setGeneratedPassphrase(data.passphrase);
       setShowGeneratedPassphrase(true);
       
-      // Speichern des Access Tokens
-      localStorage.setItem('accessToken', data.access_token);
-      
-      // Wir navigieren nicht direkt, damit der Benutzer die Passphrase sehen kann
+      // Token im RAM speichern statt localStorage
+      setAccessToken(data.access_token);
+      window.__WHISTLEDROP_AUTH_TOKEN__ = data.access_token;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
     } finally {
