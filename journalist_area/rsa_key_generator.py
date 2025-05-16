@@ -56,10 +56,10 @@ def write_keys_to_database(keys: list):
     """)
 
     for key_pair in keys:
-    cursor.execute("""
+        cursor.execute("""
                    INSERT INTO schluesselpaare (public_key, private_key)
                    VALUES (?, ?)
-                   """, (key[i][j], keys[i][j]))
+                   """, key_pair)
 
     conn.commit()
     conn.close()
