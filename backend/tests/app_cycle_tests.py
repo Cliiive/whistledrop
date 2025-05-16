@@ -38,3 +38,17 @@ def test_user_creation_login_upload_and_view():
     uploaded_files = files_response.json()
     assert len(uploaded_files) > 0
     assert uploaded_files[0]["file_name"] == "test_encrypted"
+
+    # Remove the uploaded file
+    file_id = uploaded_files[0]["id"]
+    delete_response = client.delete(f"/api/v1/upload/{file_id}", headers=headers)
+    assert delete_response.status_code == 200
+    assert delete_response.json()["message"] == "File deleted successfully"
+
+    # Check if the file is actually deleted
+    files_response_after_delete = client.get("/api/v1/upload/", headers=headers)
+    assert files_response_after_delete.status_code == 200
+    uploaded_files_after_delete = files_response_after_delete.json()
+    assert len(uploaded_files_after_delete) == 0
+
+
