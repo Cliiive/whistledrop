@@ -28,6 +28,7 @@ class File(Base):
     symetrical_key_id = Column(UUID(as_uuid=True), ForeignKey('symmetrical_keys.id', ondelete='CASCADE'), nullable=False)
     path = Column(VARCHAR(255), nullable=False)
     file_name = Column(VARCHAR(255), nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
     content_type = Column(VARCHAR(100), nullable=False)
 
 class User(Base):
