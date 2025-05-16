@@ -9,6 +9,10 @@ const UploadPage: React.FC = () => {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [files, setFiles] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Neue Zustände für den Löschdialog
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState<any | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     // Beim Laden der Komponente die bereits hochgeladenen Dateien abrufen
@@ -106,6 +110,49 @@ const UploadPage: React.FC = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  // Funktion zum Öffnen des Löschdialogs
+  const handleDeleteClick = (file: any) => {
+    setFileToDelete(file);
+    setShowDeleteDialog(true);
+  };
+
+  // Funktion zum Schließen des Löschdialogs
+  const handleCancelDelete = () => {
+    setShowDeleteDialog(false);
+    setFileToDelete(null);
+  };
+
+  // Funktion zum Löschen der Datei
+  const handleConfirmDelete = async () => {
+    if (!fileToDelete) return;
+    
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(`http://127.0.0.1:8000/api/v1/upload/${fileToDelete.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Fehler beim Löschen der Datei');
+      }
+      
+      // Datei aus der lokalen Liste entfernen
+      setFiles(files.filter(file => file.id !== fileToDelete.id));
+      
+    } catch (err) {
+      console.error('Fehler beim Löschen der Datei:', err);
+      // Optional: Fehlermeldung anzeigen
+    } finally {
+      setDeleting(false);
+      setShowDeleteDialog(false);
+      setFileToDelete(null);
+    }
+  };
+
   const containerStyles: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
@@ -188,6 +235,45 @@ const UploadPage: React.FC = () => {
   const fileSizeStyles: React.CSSProperties = {
     fontSize: '0.875rem',
     color: 'var(--color-text-light)',
+  };
+
+  // Styles für den Dialog
+  const dialogOverlayStyles: React.CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: showDeleteDialog ? 'flex' : 'none',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000
+  };
+
+  const dialogStyles: React.CSSProperties = {
+    backgroundColor: 'white',
+    borderRadius: '0.75rem',
+    padding: '1.5rem',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+    width: '90%',
+    maxWidth: '500px'
+  };
+
+  const dialogButtonsStyles: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '0.75rem',
+    marginTop: '1.5rem'
+  };
+
+  const trashIconStyles: React.CSSProperties = {
+    color: 'var(--color-danger)',
+    cursor: 'pointer',
+    padding: '0.25rem',
+    borderRadius: '50%',
+    transition: 'all 0.2s ease',
+    marginLeft: '0.5rem',
   };
 
   return (
@@ -331,7 +417,47 @@ const UploadPage: React.FC = () => {
                 </svg>
                 <span>{file.file_name}</span>
               </div>
-              <span>{new Date(file.created_at).toLocaleDateString()}</span>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span>{new Date(file.created_at).toLocaleString('us-US', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                {/* Lösch-Button */}
+                <button
+                  onClick={() => handleDeleteClick(file)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    marginLeft: '1rem',
+                    padding: '0.25rem',
+                    borderRadius: '50%',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                  title="Datei löschen"
+                >
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width="18" 
+                    height="18" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2"
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    style={{ color: '#ff5757' }}
+                  >
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                  </svg>
+                </button>
+              </div>
             </div>
           ))
         ) : (
@@ -339,6 +465,34 @@ const UploadPage: React.FC = () => {
             Keine Dateien gefunden
           </p>
         )}
+      </div>
+
+      {/* Lösch-Bestätigungsdialog */}
+      <div style={dialogOverlayStyles}>
+        <div style={dialogStyles}>
+          <h3 style={{ color: '#4A3B76', marginTop: 0 }}>Datei löschen</h3>
+          <p>
+            Möchten Sie wirklich die Datei <strong>{fileToDelete?.file_name}</strong> löschen? 
+            Dieser Vorgang kann nicht rückgängig gemacht werden.
+          </p>
+          <div style={dialogButtonsStyles}>
+            <Button 
+              variant="outlined" 
+              onClick={handleCancelDelete} 
+              disabled={deleting}
+            >
+              Abbrechen
+            </Button>
+            <Button 
+              variant="danger" 
+              onClick={handleConfirmDelete} 
+              loading={deleting}
+              disabled={deleting}
+            >
+              {deleting ? 'Wird gelöscht...' : 'Löschen'}
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
