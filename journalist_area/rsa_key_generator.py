@@ -86,7 +86,6 @@ if __name__ == "__main__":
 
     #print("Number: ", args.number, " | Size of Key: ", args.size)
     key = generate_multiple_keys(count=args.number, key_size=args.size)
-    #print(key[0][1])
     
     write_keys_to_database(keys = key)
 
