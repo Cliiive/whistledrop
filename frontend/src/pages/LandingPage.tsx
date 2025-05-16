@@ -258,7 +258,6 @@ const LandingPage: React.FC = () => {
                   <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
                 </svg>
               }
-              style={{ flex: 1 }}
             >
               Kopieren
             </Button>
@@ -267,7 +266,6 @@ const LandingPage: React.FC = () => {
               variant="primary" 
               size="medium"
               onClick={handleContinueToUpload}
-              style={{ flex: 1 }}
             >
               Weiter zum Upload
             </Button>

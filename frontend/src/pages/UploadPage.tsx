@@ -75,7 +75,7 @@ const UploadPage: React.FC = () => {
         throw new Error(errorData?.detail || 'Upload fehlgeschlagen');
       }
       
-      const data = await response.json();
+      // const data = await response.json();
       setUploadSuccess(true);
       setSelectedFile(null);
       
@@ -177,9 +177,9 @@ const UploadPage: React.FC = () => {
     textAlign: 'center',
   };
 
-  const fileInputStyles: React.CSSProperties = {
-    marginBottom: '1.5rem',
-  };
+  // const fileInputStyles: React.CSSProperties = {
+  //   marginBottom: '1.5rem',
+  // };
 
   const fileListStyles: React.CSSProperties = {
     marginTop: '2rem',
@@ -266,14 +266,14 @@ const UploadPage: React.FC = () => {
     marginTop: '1.5rem'
   };
 
-  const trashIconStyles: React.CSSProperties = {
-    color: 'var(--color-danger)',
-    cursor: 'pointer',
-    padding: '0.25rem',
-    borderRadius: '50%',
-    transition: 'all 0.2s ease',
-    marginLeft: '0.5rem',
-  };
+  // const trashIconStyles: React.CSSProperties = {
+  //   color: 'var(--color-danger)',
+  //   cursor: 'pointer',
+  //   padding: '0.25rem',
+  //   borderRadius: '50%',
+  //   transition: 'all 0.2s ease',
+  //   marginLeft: '0.5rem',
+  // };
 
   return (
     <div style={containerStyles}>
