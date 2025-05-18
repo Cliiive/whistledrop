@@ -9,9 +9,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DOWNLOAD_FOLDER = os.getenv("DOWNLOAD_FOLDER", "./downloads")
+DOWNLOAD_FOLDER = os.getenv("DOWNLOAD_FOLDER", "../downloads")
 
-CONFIG_FILE = "last_fetch.ini"
+CONFIG_FILE = "../last_fetch.ini"
 
 # Hilfsfunktion zum Formatieren von Datum/Zeit
 def format_datetime(dt):

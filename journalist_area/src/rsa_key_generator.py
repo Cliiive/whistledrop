@@ -1,4 +1,5 @@
 #Bib. cryptography
+import uuid
 import argparse
 import sqlite3
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -49,7 +50,7 @@ def write_keys_to_database(keys: list):
     # Tabelle erstellen
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS schluesselpaare (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id TEXT PRIMARY KEY,
             public_key TEXT NOT NULL,
             private_key TEXT NOT NULL
         )
@@ -57,9 +58,9 @@ def write_keys_to_database(keys: list):
 
     for key_pair in keys:
         cursor.execute("""
-                   INSERT INTO schluesselpaare (private_key, public_key)
-                   VALUES (?, ?)
-                   """, key_pair)
+                   INSERT INTO schluesselpaare (id, private_key, public_key)
+                   VALUES (?, ?, ?)
+                   """, (str(uuid.uuid4()), key_pair[0], key_pair[1]))
 
     conn.commit()
     conn.close()

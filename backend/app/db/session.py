@@ -67,7 +67,7 @@ def init_db():
 
             # Tabellenzugriff
             "GRANT SELECT, INSERT, UPDATE ON users, files, symmetrical_keys TO normal_role;",
-            "GRANT SELECT, INSERT ON public_keys TO normal_role;", # TODO: IMPORTANT IMPORTANT REMOVE INSERT HERE
+            "GRANT SELECT, INSERT, UPDATE ON public_keys TO normal_role;", # TODO: IMPORTANT IMPORTANT REMOVE INSERT HERE
             "GRANT DELETE ON files TO normal_role;",
             "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO admin_role;",
             "GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO normal_role, admin_role;",

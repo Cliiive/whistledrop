@@ -28,7 +28,11 @@ async def upload_file(
     # TODO: Error handling -> what if the pdf is saved but the key is not?
     # handle encryption + storage
     result = encrypt_pdf(file)
+
+
     encrypted_key, public_key_id = encrypt_aes_key(db, result.key)
+
+
     aes_key_id = save_aesgcm_key(db, encrypted_key, public_key_id, result.nonce)
 
     file_id: UUID = save_encrypted_file(db, result.file_name, result.ciphertext, current_user.id, aes_key_id)

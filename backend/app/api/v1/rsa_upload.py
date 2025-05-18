@@ -16,16 +16,14 @@ from app.db.session import get_db
 
 router = APIRouter()
 
-@router.post("/")
+@router.post("/{id}")
 def upload_public_keys(
-    public_key: UploadFile = File(...),
+    id: UUID,
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_active_user),
+
     db: Session = Depends(get_user_db) # type: ignore
 ):
-    # Check if the file type is allowed
-    if not allowed_type(file):
-        raise FileTypeNotAllowed()
 
     if not current_user.is_admin:
         raise HTTPException(
@@ -35,14 +33,15 @@ def upload_public_keys(
 
     valid_pem_types = ["application/x-pem-file", "application/x-x509-ca-cert",
                        "text/plain", "application/pkcs10"]
-    if public_key.content_type not in valid_pem_types:
+    if file.content_type not in valid_pem_types:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Nur PEM-Dateien sind erlaubt. Unterstützte Formate: PEM-Datei, X.509-Zertifikat"
         )
 
+    print(id)
     # insert the key into the public_keys table
-    key = db_models.PublicKey(uuid.uuid4(), True, public_key.file.read())
+    key = db_models.PublicKey(id=id, active=True, key=file.file.read())
     db.add(key)
     db.commit()
     db.refresh(key)

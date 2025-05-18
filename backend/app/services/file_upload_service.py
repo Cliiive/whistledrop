@@ -80,17 +80,37 @@ def save_aesgcm_key(db: Session, aes_key: bytes, public_key_id: UUID, nonce: byt
 
 
 def encrypt_aes_key(db: Session, aes_key: bytes) -> tuple[bytes, UUID]:
-    # Encrypt the AES key with the public key
-    # This is a placeholder for the actual encryption logic
-    # You would use a public key encryption algorithm here
+    """Verschlüsselt einen AES-Schlüssel mit einem öffentlichen RSA-Schlüssel."""
+    from cryptography.hazmat.primitives.asymmetric import padding
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.serialization import load_pem_public_key
+    from base64 import b64encode
 
-    # TODO: Placeholder for public key encryption
-    pub_key = PublicKey(active=True, key=bytes(0x1))  # Placeholder for the public key
-    db.add(pub_key)
+    # Hole den nächsten aktiven öffentlichen Schlüssel
+    pub_key: PublicKey = db.query(PublicKey).filter(PublicKey.active == True).first()
+
+    # Markiere den öffentlichen Schlüssel als inaktiv
+    pub_key.active = False
     db.commit()
     db.refresh(pub_key)
 
-    return aes_key, pub_key.id  # TODO: Implement actual encryption logic
+    # Deserialisiere den öffentlichen Schlüssel
+    public_key = load_pem_public_key(pub_key.key)
+
+    # Verschlüssele den AES-Schlüssel mit dem öffentlichen RSA-Schlüssel
+    encrypted_key = public_key.encrypt(
+        aes_key,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+
+    # Kodiere den verschlüsselten Schlüssel als Base64 für die Speicherung
+    encrypted_key_b64 = b64encode(encrypted_key)
+
+    return encrypted_key_b64, pub_key.id
 
 def allowed_type(file: UploadFile) -> bool:
     # Check if the file is a PDF
