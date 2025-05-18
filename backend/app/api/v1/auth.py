@@ -1,7 +1,7 @@
 # backend/app/api/v1/auth.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.core.dependencies import get_db_session
+from app.core.base_deps import get_db_session
 from app.services.auth_service import authenticate_user, create_user
 from pydantic import BaseModel
 from app.core.auth import create_access_token

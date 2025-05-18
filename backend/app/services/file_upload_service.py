@@ -75,8 +75,8 @@ def save_aesgcm_key(db: Session, aes_key: bytes, public_key_id: UUID, nonce: byt
     db.add(db_key)
     db.commit()
     db.refresh(db_key)
-    return db_key.id
     print(f"Key saved with ID {db_key.id}")
+    return db_key.id
 
 
 def encrypt_aes_key(db: Session, aes_key: bytes) -> tuple[bytes, UUID]:
