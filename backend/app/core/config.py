@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # Datenbank-Einstellungen
-    DATABASE_URL: str = os.getenv("DATABASE_URL")
+    DATABASE_URL: str = os.getenv("DATABASE_URL_NORMAL")
 
     # Auth-Einstellungen
     AUTH_SECRET: str = os.getenv("AUTH_SECRET")

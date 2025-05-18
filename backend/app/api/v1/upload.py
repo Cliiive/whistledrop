@@ -4,18 +4,20 @@ from sqlalchemy.orm import Session
 from app.services.file_upload_service import encrypt_pdf, save_aesgcm_key, encrypt_aes_key, save_encrypted_file
 from app.services.file_upload_service import allowed_type
 from app.services.file_remove_service import delete_file_from_db, delete_file_from_storage
+from app.core.dependencies import get_user_db
 from app.core.dependencies import get_db_session
 from app.models.models import User
 import app.models.models as db_models
 from app.core.auth import get_current_active_user
 from app.core.exceptions import FileTypeNotAllowed
+from app.db.session import get_db
 router = APIRouter()
 
 @router.post("/")
 async def upload_file(
     file: UploadFile = File(...),
-    db: Session = Depends(get_db_session),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_user_db) # type: ignore
 ):
     # Check if the file type is allowed
     if not allowed_type(file):
@@ -36,7 +38,7 @@ async def upload_file(
 # return a list of files the user has uploaded
 @router.get("/")
 async def get_files(
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_user_db),
     current_user: User = Depends(get_current_active_user)
 ):
     files = db.query(db_models.File).filter(db_models.File.user_id == current_user.id).all()
@@ -45,7 +47,7 @@ async def get_files(
 @router.delete("/{id}")
 async def delete_file(
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_user_db),
     current_user: User = Depends(get_current_active_user)
 ):
     # Check if the file exists
