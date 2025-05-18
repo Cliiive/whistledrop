@@ -11,3 +11,5 @@ pytest-mock
 faker
 python-jose
 pydantic-settings
+sshtunnel
+requests

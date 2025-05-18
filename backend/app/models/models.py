@@ -36,4 +36,5 @@ class User(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     passphrase_hash = Column(VARCHAR(255), nullable=False)
+    is_admin = Column(Boolean, nullable=False, default=False)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)

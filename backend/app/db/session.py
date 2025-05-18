@@ -1,8 +1,11 @@
+import uuid
+
 from ..models.models import Base
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
+from app.core.security import hash_passphrase
 import os
 
 load_dotenv()
@@ -77,6 +80,18 @@ def init_db():
     finally:
         conn.close()
 
+def create_admin_account():
+    """Admin-Account erstellen"""
+    conn = admin_engine.connect()
+
+    try:
+        # Admin-Account erstellen
+        admin_password = os.getenv("POSTGRES_ADMIN_PASSWORD")
+        hashed_password = hash_passphrase(admin_password)
+        conn.execute(text(f"INSERT INTO users (id, passphrase_hash, is_admin) VALUES ('{uuid.uuid4()}', '{hashed_password}', true);"))
+        conn.commit()
+    finally:
+        conn.close()
 
 def get_db(user_type="normal", user_id=None):
     """DB-Session mit entsprechenden Berechtigungen holen."""
