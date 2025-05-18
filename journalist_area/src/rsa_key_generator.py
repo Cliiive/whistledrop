@@ -43,7 +43,7 @@ def generate_multiple_keys(count: int, key_size: int):
 
 def write_keys_to_database(keys: list):
     # Verbindung zur SQLite-Datenbank (Datei wird erstellt, falls sie nicht existiert)
-    conn = sqlite3.connect("meine_datenbank.db")
+    conn = sqlite3.connect("../meine_datenbank.db")
     cursor = conn.cursor()
 
     # Tabelle erstellen
@@ -57,7 +57,7 @@ def write_keys_to_database(keys: list):
 
     for key_pair in keys:
         cursor.execute("""
-                   INSERT INTO schluesselpaare (public_key, private_key)
+                   INSERT INTO schluesselpaare (private_key, public_key)
                    VALUES (?, ?)
                    """, key_pair)
 
@@ -86,7 +86,6 @@ if __name__ == "__main__":
 
     #print("Number: ", args.number, " | Size of Key: ", args.size)
     key = generate_multiple_keys(count=args.number, key_size=args.size)
-    #print(key[0][1])
     
     write_keys_to_database(keys = key)
 
