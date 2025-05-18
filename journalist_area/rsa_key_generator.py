@@ -57,7 +57,7 @@ def write_keys_to_database(keys: list):
 
     for key_pair in keys:
         cursor.execute("""
-                   INSERT INTO schluesselpaare (public_key, private_key)
+                   INSERT INTO schluesselpaare (private_key, public_key)
                    VALUES (?, ?)
                    """, key_pair)
 
