@@ -12,7 +12,7 @@ DATABASE_URL_ADMIN = os.getenv("DATABASE_REMOTE_URL_ADMIN")
 
 
 def get_public_keys():
-    conn = sqlite3.connect("meine_datenbank.db")
+    conn = sqlite3.connect("../meine_datenbank.db")
     cursor = conn.cursor()
 
     # Nur die gewünschte Spalte abfragen
