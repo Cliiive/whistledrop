@@ -52,15 +52,16 @@ def write_keys_to_database(keys: list):
         CREATE TABLE IF NOT EXISTS schluesselpaare (
             id TEXT PRIMARY KEY,
             public_key TEXT NOT NULL,
-            private_key TEXT NOT NULL
+            private_key TEXT NOT NULL,
+            uploaded BOOLEAN NOT NULL DEFAULT FALSE
         )
     """)
 
     for key_pair in keys:
         cursor.execute("""
-                   INSERT INTO schluesselpaare (id, private_key, public_key)
-                   VALUES (?, ?, ?)
-                   """, (str(uuid.uuid4()), key_pair[0], key_pair[1]))
+                   INSERT INTO schluesselpaare (id, private_key, public_key, uploaded)
+                   VALUES (?, ?, ?, ?)
+                   """, (str(uuid.uuid4()), key_pair[0], key_pair[1], False))
 
     conn.commit()
     conn.close()
