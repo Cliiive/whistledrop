@@ -26,7 +26,7 @@ def load_private_key_from_db(public_key_id):
     
     result = cursor.fetchone()
     conn.close()
-    
+
     if not result:
         raise ValueError(f"Kein privater Schlüssel für ID {public_key_id} gefunden!")
     
@@ -38,28 +38,40 @@ def load_private_key_from_db(public_key_id):
     
     return private_key
 
+
 def decrypt_aes_key(encrypted_key, private_key):
     """Entschlüsselt einen AES-Schlüssel mit einem privaten RSA-Schlüssel."""
-    # Base64-decodieren des verschlüsselten Schlüssels
-    encrypted_key_bytes = b64decode(encrypted_key)
-    
-    # Entschlüsseln des AES-Schlüssels mit dem privaten RSA-Schlüssel
-    decrypted_key = private_key.decrypt(
-        encrypted_key_bytes,
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
+    try:
+        # Entferne alle Whitespaces und Zeilenumbrüche
+
+        # Base64-decodieren des verschlüsselten Schlüssels
+        encrypted_key_bytes = b64decode(encrypted_key)
+        # Prüfe Längen
+        key_size_bytes = private_key.key_size // 8
+        if len(encrypted_key_bytes) != key_size_bytes:
+            print(
+                f"Warnung: Ciphertext-Länge ({len(encrypted_key_bytes)}) stimmt nicht mit Schlüsselgröße ({key_size_bytes}) überein")
+
+        # Entschlüsseln des AES-Schlüssels mit dem privaten RSA-Schlüssel
+        decrypted_key = private_key.decrypt(
+            encrypted_key_bytes,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
         )
-    )
-    
-    return decrypted_key
+
+        return decrypted_key
+    except Exception as e:
+        print(f"Fehler beim Entschlüsseln des AES-Schlüssels: {e}")
+        raise
 
 def decrypt_file(encrypted_file_path, aes_key, nonce, output_file_path):
     """Entschlüsselt eine Datei mit AES-GCM."""
     try:
         # Lese die verschlüsselte Datei
-        with open(encrypted_file_path, 'rb') as file:
+        with open(encrypted_file_path , 'rb') as file:
             encrypted_data = file.read()
         
         # Entschlüsseln mit AES-GCM
@@ -106,22 +118,30 @@ def process_files(input_dir, output_dir):
             # Extrahiere verschlüsselten Schlüssel und Public Key ID
             key_lines = key_info.split('\n')
             encrypted_key = key_lines[0].replace("Encrypted Key: ", "")
-            nonce = key_lines[1].replace("Nonce: ", "").encode('utf-8')
+            nonce = key_lines[1].replace("Nonce: ", "")
             public_key_id = key_lines[2].replace("Public Key ID: ", "")
-            
             # Hier beginnt der spezielle Teil für SQLite
             # Lade den privaten Schlüssel
             private_key = load_private_key_from_db(public_key_id)
-            
+
+            # Sichere Alternative zu eval() für Strings, die Python-Literale enthalten
+            import ast
+            try:
+                encrypted_key = ast.literal_eval(encrypted_key)
+                nonce = ast.literal_eval(nonce)
+            except (ValueError, SyntaxError) as e:
+                print(f"Fehler beim Parsen der Schlüsseldaten: {e}")
+                raise
+
             # Entschlüssele den AES-Schlüssel
             aes_key = decrypt_aes_key(encrypted_key, private_key)
-            
+            print(f"Entschlüsselter AES-Schlüssel: {aes_key}")
             # Erzeuge den Ausgabepfad
-            original_filename = '_'.join(filename.split('_')[1:])  # Entferne die ID
+            original_filename = '_'.join(filename.split('_')[1:])
             output_file_path = os.path.join(output_dir, original_filename)
             
             # Entschlüssele die Datei
-            if decrypt_file(file_path, aes_key, nonce, output_file_path):
+            if decrypt_file(file_path, aes_key, nonce, output_file_path + ".pdf"):
                 success_count += 1
                 print(f"Datei erfolgreich entschlüsselt: {output_file_path}")
             else:
