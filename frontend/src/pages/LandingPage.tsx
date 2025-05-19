@@ -47,7 +47,7 @@ const LandingPage: React.FC = () => {
       // Weiterleitung zur Upload-Seite
       navigate('/upload');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +62,7 @@ const LandingPage: React.FC = () => {
       });
       
       if (!response.ok) {
-        throw new Error('Fehler beim Generieren einer neuen Passphrase');
+        throw new Error('Error generating passphrase');
       }
       
       const data = await response.json();
@@ -73,7 +73,7 @@ const LandingPage: React.FC = () => {
       setAccessToken(data.access_token);
       window.__WHISTLEDROP_AUTH_TOKEN__ = data.access_token;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -86,10 +86,10 @@ const LandingPage: React.FC = () => {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedPassphrase)
       .then(() => {
-        alert('Passphrase in die Zwischenablage kopiert');
+        alert('Passphrase copied to clipboard!');
       })
       .catch((error) => {
-        console.error('Fehler beim Kopieren: ', error);
+        console.error('Error copying: ', error);
       });
   };
 
@@ -184,21 +184,21 @@ const LandingPage: React.FC = () => {
     <div style={containerStyles}>
       <div>
         <h1 style={headerStyles}>WhistleDrop</h1>
-        <p style={subHeaderStyles}>Sicherer Datenaustausch für Whistleblower</p>
+        <p style={subHeaderStyles}>Secure file exchange for whistleblower</p>
       </div>
       
       {!showGeneratedPassphrase ? (
         <>
           <InputField
             label="Passphrase"
-            placeholder="Geben Sie Ihre Passphrase ein, um auf das Upload-Formular zuzugreifen"
+            placeholder="Please enter your passphrase"
             type="password"
             value={passphrase}
             onChange={handlePassphraseChange}
             error={error || undefined}
             fullWidth
             onSubmit={handleLogin}
-            helperText="Geben Sie Ihre Passphrase ein und drücken Sie Enter"
+            helperText="Enter your passphrase to access your files."
             endIcon={
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -214,14 +214,14 @@ const LandingPage: React.FC = () => {
             onClick={handleLogin}
             loading={isLoading}
           >
-            Anmelden
+            Login
           </Button>
 
           <div style={separatorStyles}>
             <hr style={{ border: 'none', borderTop: '1px solid #DCD3FA', margin: '10px 0' }} />
           </div>
           
-          <p style={noPassphraseTextStyles}>Haben Sie noch keine Passphrase?</p>
+          <p style={noPassphraseTextStyles}>Don't have a passphrase yet?</p>
           
           <Button 
             variant="secondary" 
@@ -230,16 +230,17 @@ const LandingPage: React.FC = () => {
             onClick={handleGeneratePassphrase}
             loading={isLoading}
           >
-            Neue Passphrase generieren
+            Generate new passphrase
           </Button>
         </>
       ) : (
         <>
           <div style={warningBoxStyles}>
-            <p style={warningTextStyles}>⚠️ WICHTIGER HINWEIS</p>
+            <p style={warningTextStyles}>⚠️ IMPORTANT</p>
             <p style={cautionTextStyles}>
-              Diese Passphrase wird nur ein einziges Mal angezeigt. Bitte speichern Sie sie an einem sicheren Ort.
-              Ohne diese Passphrase können Sie nicht mehr auf Ihre Dateien zugreifen.
+              This passphrase will only be shown once. Please save it securely.
+              If you lose it, you will not be able to access your files.
+
             </p>
           </div>
           
@@ -259,7 +260,7 @@ const LandingPage: React.FC = () => {
                 </svg>
               }
             >
-              Kopieren
+              Copy Passphrase
             </Button>
             
             <Button 
@@ -267,7 +268,7 @@ const LandingPage: React.FC = () => {
               size="medium"
               onClick={handleContinueToUpload}
             >
-              Weiter zum Upload
+              Go to Upload
             </Button>
           </div>
         </>
