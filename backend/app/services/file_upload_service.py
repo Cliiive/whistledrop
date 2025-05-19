@@ -89,6 +89,8 @@ def encrypt_aes_key(db: Session, aes_key: bytes) -> tuple[bytes, UUID]:
     # Hole den nächsten aktiven öffentlichen Schlüssel
     pub_key: PublicKey = db.query(PublicKey).filter(PublicKey.active == True).first()
 
+    if not pub_key:
+        raise Exception("Due to high usage of the system, uploading files is currently not possible. Please try again later.")
     # Markiere den öffentlichen Schlüssel als inaktiv
     pub_key.active = False
     db.commit()
