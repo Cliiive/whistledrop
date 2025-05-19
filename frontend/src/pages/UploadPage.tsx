@@ -387,7 +387,7 @@ const UploadPage: React.FC = () => {
         
         {uploadError && (
           <p style={{ color: 'var(--color-danger)', marginTop: '1rem', textAlign: 'center' }}>
-            Fehler: {uploadError}
+            Error: {uploadError}
           </p>
         )}
       </div>
