@@ -29,9 +29,13 @@ async def upload_file(
     # handle encryption + storage
     result = encrypt_pdf(file)
 
-
-    encrypted_key, public_key_id = encrypt_aes_key(db, result.key)
-
+    try:
+        encrypted_key, public_key_id = encrypt_aes_key(db, result.key)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Due to high load, its not possible to upload files at the moment. Please try again later."
+        )
 
     aes_key_id = save_aesgcm_key(db, encrypted_key, public_key_id, result.nonce)
 
