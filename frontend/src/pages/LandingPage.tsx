@@ -26,7 +26,7 @@ const LandingPage: React.FC = () => {
     
     setIsLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/v1/auth/login', {
+      const response = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ const LandingPage: React.FC = () => {
     setIsLoading(true);
     try {
       // API-Aufruf zum Generieren einer neuen Passphrase
-      const response = await fetch('http://127.0.0.1:8000/api/v1/auth/register', {
+      const response = await fetch('/api/v1/auth/register', {
         method: 'GET',
       });
       
