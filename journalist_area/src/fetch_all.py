@@ -1,5 +1,7 @@
 import os
 import configparser
+from email.feedparser import headerRE
+
 import requests
 import zipfile
 import io
@@ -57,7 +59,7 @@ def save_last_fetch_date(last_date):
 # Stelle sicher, dass der Download-Ordner existiert
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
-def start_fetching():
+def start_fetching(token, tor_get):
     # Hole das letzte Abrufdatum
     last_fetch_date = get_last_fetch_date()
     
@@ -72,28 +74,13 @@ def start_fetching():
         fetch_date_for_api = parsed_date.strftime('%Y-%m-%d')
         print(f"Fetching files newer than {fetch_date_for_api}")
 
-    login_response = requests.post(
-        "http://127.0.0.1:8000/api/v1/auth/login/",
-        json={"passphrase": os.getenv("POSTGRES_ADMIN_PASSWORD")}
-    )
-
-    # Überprüfe die Antwort des Login-Requests
-    if login_response.status_code != 200:
-        print(f"Login failed: {login_response.status_code} - {login_response.text}")
-        exit(1)
-
-    # Extrahiere den API-Token aus der Antwort
-    login_data = login_response.json()
-    API_TOKEN = login_data.get("access_token")
-
-    # API-Anfrage vorbereiten
     headers = {
-        "Authorization": f"Bearer {API_TOKEN}"
+        "Authorization": f"Bearer {token}"
     }
-    
+
     # API-Anfrage senden
-    response = requests.get(
-        f"http://127.0.0.1:8000/api/v1/download/new-files/?since_date={fetch_date_for_api}",
+    response = tor_get(
+        f"/download/new-files/?since_date={fetch_date_for_api}",
         headers=headers
     )
     

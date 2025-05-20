@@ -4,6 +4,26 @@ from src.rsa_key_generator import generate_multiple_keys, write_keys_to_database
 from src.rsa_key_uploader import get_public_keys, create_temp_key_file, upload_key_file, update_local_database
 from src.clear_my_database import clear_everything
 from src.fetch_all import start_fetching
+import requests
+
+session = requests.Session()
+
+# Set default proxy (e.g., for Tor)
+session.proxies = {
+    'http': 'socks5h://127.0.0.1:9150',
+    'https': 'socks5h://127.0.0.1:9150'
+}
+
+BASE_URL: str = "http://flmfe5vhq7aftlhg5kkz5o4xdsqezzly72soi5zomam3qfssre3z4oad.onion/api/v1"
+
+# Optional: Set a default timeout (via a wrapper function)
+def tor_get(url, **kwargs):
+    return session.get(BASE_URL + url, timeout=30, **kwargs)
+
+# Optional: Set a default timeout (via a wrapper function)
+def tor_post(url, **kwargs):
+    print(BASE_URL + url)
+    return session.post(BASE_URL + url, timeout=30, **kwargs)
 
 def upload(count: int, token: str):
 
@@ -18,14 +38,14 @@ def upload(count: int, token: str):
     print(f"{len(keys)} Found key.")
     for index, key in enumerate(keys):
         filename = create_temp_key_file(key, index)
-        upload_key_file(filename, ids[index])
+        upload_key_file(filename, token, tor_post, ids[index])
 
     print("..und auf den Server hochgeladen")
 
     update_local_database()
 
-def download():
-    start_fetching()
+def download(token: str):
+    start_fetching(token, tor_get=tor_get)
 
 def cleanup():
     clear_everything()
@@ -34,11 +54,11 @@ def cleanup():
 def authenticate_user():
     passphrase = input("Please enter your passphrase: ")
 
-    auth_url = "http://localhost:8000/api/v1/auth/login"
+    auth_url = "/auth/login"
 
     print("Authenticating user...")
     # Send the POST request
-    login_response = requests.post(auth_url, json={"passphrase": passphrase})
+    login_response = tor_post(auth_url, json={"passphrase": passphrase})
 
     if login_response.status_code != 200:
         print("Login failed:", login_response.text)
@@ -69,9 +89,11 @@ def main():
 
     if args.command == "upload":
         token = authenticate_user()
+        print(token)
         upload(args.count, token)
     elif args.command == "download":
-        download()
+        token = authenticate_user()
+        download(token)
     elif args.command == "cleanup":
         cleanup()
 
