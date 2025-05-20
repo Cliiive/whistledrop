@@ -12,7 +12,7 @@ import shutil
 
 DATABASE_PATH = "../../meine_datenbank.db"
 DEFAULT_INPUT_DIR = "../../downloads"
-DEFAULT_OUTPUT_DIR = "../decrypted_files"
+DEFAULT_OUTPUT_DIR = "../../decrypted_files"
 
 def load_private_key_from_db(public_key_id):
     """Lädt den privaten Schlüssel aus der Datenbank basierend auf der ID."""

@@ -5,6 +5,7 @@ def clear_everything():
     local_database_path = "../meine_datenbank.db"
     public_keys_path = "./temp_keys"
     local_files_path = "../downloads"
+    decrypted_files_path = "../decrypted_files"
 
     if os.path.exists(local_database_path):
         os.remove(local_database_path)
@@ -23,3 +24,9 @@ def clear_everything():
         print(f"{local_files_path} (Ordner) wurde gelöscht.")
     else:
         print(f" {local_files_path} existiert nicht.")
+
+    if os.path.isdir(decrypted_files_path):
+        shutil.rmtree(decrypted_files_path)
+        print(f"{decrypted_files_path} (Ordner) wurde gelöscht.")
+    else:
+        print(f" {decrypted_files_path} existiert nicht.")
