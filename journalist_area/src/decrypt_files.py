@@ -10,9 +10,9 @@ from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from base64 import b64decode
 import shutil
 
-DATABASE_PATH = "../../meine_datenbank.db"
-DEFAULT_INPUT_DIR = "../../downloads"
-DEFAULT_OUTPUT_DIR = "../../decrypted_files"
+DATABASE_PATH = "../meine_datenbank.db"
+DEFAULT_INPUT_DIR = "../downloads"
+DEFAULT_OUTPUT_DIR = "../decrypted_files"
 
 def load_private_key_from_db(public_key_id):
     """Lädt den privaten Schlüssel aus der Datenbank basierend auf der ID."""
@@ -156,22 +156,22 @@ def process_files(input_dir, output_dir):
     print(f"Fehler: {error_count} Dateien")
     return success_count, error_count
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Entschlüsselt Dateien mit RSA-privaten Schlüsseln und AES.")
-    
-    parser.add_argument(
-        "-i", "--input",
-        default=DEFAULT_INPUT_DIR,
-        help=f"Eingabeverzeichnis mit verschlüsselten Dateien (Standard: {DEFAULT_INPUT_DIR})"
-    )
-    
-    parser.add_argument(
-        "-o", "--output",
-        default=DEFAULT_OUTPUT_DIR,
-        help=f"Ausgabeverzeichnis für entschlüsselte Dateien (Standard: {DEFAULT_OUTPUT_DIR})"
-    )
-    
-    args = parser.parse_args()
-    
-    print(f"Entschlüssele Dateien aus {args.input} nach {args.output}")
-    process_files(args.input, args.output)
+def decrypt_all():
+    # parser = argparse.ArgumentParser(description="Entschlüsselt Dateien mit RSA-privaten Schlüsseln und AES.")
+    #
+    # parser.add_argument(
+    #     "-i", "--input",
+    #     default=DEFAULT_INPUT_DIR,
+    #     help=f"Eingabeverzeichnis mit verschlüsselten Dateien (Standard: {DEFAULT_INPUT_DIR})"
+    # )
+    #
+    # parser.add_argument(
+    #     "-o", "--output",
+    #     default=DEFAULT_OUTPUT_DIR,
+    #     help=f"Ausgabeverzeichnis für entschlüsselte Dateien (Standard: {DEFAULT_OUTPUT_DIR})"
+    # )
+    #
+    # args = parser.parse_args()
+    #
+    print(f"Entschlüssele Dateien aus ./downloads nach ./decrypted_files")
+    process_files(DEFAULT_INPUT_DIR, DEFAULT_OUTPUT_DIR)

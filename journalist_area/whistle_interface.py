@@ -4,6 +4,7 @@ from src.rsa_key_generator import generate_multiple_keys, write_keys_to_database
 from src.rsa_key_uploader import get_public_keys, create_temp_key_file, upload_key_file, update_local_database
 from src.clear_my_database import clear_everything
 from src.fetch_all import start_fetching
+from src.decrypt_files import decrypt_all
 import requests
 
 session = requests.Session()
@@ -22,7 +23,7 @@ def tor_get(url, **kwargs):
 
 # Optional: Set a default timeout (via a wrapper function)
 def tor_post(url, **kwargs):
-    print(BASE_URL + url)
+    # print(BASE_URL + url)
     return session.post(BASE_URL + url, timeout=30, **kwargs)
 
 def upload(count: int, token: str):
@@ -94,6 +95,7 @@ def main():
     elif args.command == "download":
         token = authenticate_user()
         download(token)
+        decrypt_all()
     elif args.command == "cleanup":
         cleanup()
 
