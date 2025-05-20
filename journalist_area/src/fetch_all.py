@@ -57,7 +57,7 @@ def save_last_fetch_date(last_date):
 # Stelle sicher, dass der Download-Ordner existiert
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
-try:
+def start_fetching():
     # Hole das letzte Abrufdatum
     last_fetch_date = get_last_fetch_date()
     
@@ -118,6 +118,3 @@ try:
         current_date = format_datetime(datetime.now())
         save_last_fetch_date(current_date)
         print(f"Updated last fetch date to {current_date}")
-
-except Exception as e:
-    print(f"Error: {e}")

@@ -28,13 +28,13 @@ const UploadPage: React.FC = () => {
       });
       
       if (!response.ok) {
-        throw new Error('Fehler beim Abrufen der Dateien');
+        throw new Error('Error fetching files');
       }
       
       const data = await response.json();
       setFiles(data);
     } catch (err) {
-      console.error('Fehler beim Laden der Dateien:', err);
+      console.error('Error:', err);
     }
   };
 
@@ -49,7 +49,7 @@ const UploadPage: React.FC = () => {
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      setUploadError('Bitte wählen Sie eine Datei aus');
+      setUploadError('Please select a file to upload');
       return;
     }
 
@@ -72,7 +72,7 @@ const UploadPage: React.FC = () => {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.detail || 'Upload fehlgeschlagen');
+        throw new Error(errorData?.detail || 'Upload failed');
       }
       
       // const data = await response.json();
@@ -87,7 +87,7 @@ const UploadPage: React.FC = () => {
       // Aktualisieren der Dateien-Liste
       fetchUploadedFiles();
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
+      setUploadError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setUploading(false);
     }
@@ -136,14 +136,14 @@ const UploadPage: React.FC = () => {
       });
       
       if (!response.ok) {
-        throw new Error('Fehler beim Löschen der Datei');
+        throw new Error('Error deleting file');
       }
       
       // Datei aus der lokalen Liste entfernen
       setFiles(files.filter(file => file.id !== fileToDelete.id));
       
     } catch (err) {
-      console.error('Fehler beim Löschen der Datei:', err);
+      console.error('Error:', err);
       // Optional: Fehlermeldung anzeigen
     } finally {
       setDeleting(false);
@@ -277,7 +277,7 @@ const UploadPage: React.FC = () => {
 
   return (
     <div style={containerStyles}>
-      <h1 style={headerStyles}>Dateien hochladen</h1>
+      <h1 style={headerStyles}>Upload files</h1>
       
       <div style={cardStyles}>
         <input
@@ -327,10 +327,10 @@ const UploadPage: React.FC = () => {
             </svg>
             
             <p style={{ color: 'var(--color-text)', fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-              Datei hier ablegen oder klicken, um auszuwählen
+              Place your file here or click to upload
             </p>
             <p style={{ color: 'var(--color-text-light)', fontSize: '0.875rem' }}>
-              Ausschließlich PDF dateien sind erlaubt
+              Only pdf files are allowed
             </p>
           </div>
         ) : (
@@ -364,7 +364,7 @@ const UploadPage: React.FC = () => {
                 if (fileInputRef.current) fileInputRef.current.value = '';
               }}
             >
-              Ändern
+              Change
             </Button>
           </div>
         )}
@@ -376,24 +376,24 @@ const UploadPage: React.FC = () => {
           loading={uploading}
           disabled={!selectedFile || uploading}
         >
-          {uploading ? 'Wird hochgeladen...' : 'Datei hochladen'}
+          {uploading ? 'Your file is beeing uploaded' : 'Upload file'}
         </Button>
         
         {uploadSuccess && (
           <p style={{ color: 'var(--color-success)', marginTop: '1rem', textAlign: 'center' }}>
-            Datei erfolgreich hochgeladen!
+            Uploaded file successfully!
           </p>
         )}
         
         {uploadError && (
           <p style={{ color: 'var(--color-danger)', marginTop: '1rem', textAlign: 'center' }}>
-            Fehler: {uploadError}
+            Error: {uploadError}
           </p>
         )}
       </div>
       
       <div style={fileListStyles}>
-        <h2 style={{ ...headerStyles, fontSize: '1.5rem' }}>Ihre hochgeladenen Dateien</h2>
+        <h2 style={{ ...headerStyles, fontSize: '1.5rem' }}>Your uploaded files</h2>
         
         {files.length > 0 ? (
           files.map((file, index) => (
@@ -436,7 +436,7 @@ const UploadPage: React.FC = () => {
                   onMouseOut={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent';
                   }}
-                  title="Datei löschen"
+                  title="Delete file"
                 >
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
@@ -461,7 +461,7 @@ const UploadPage: React.FC = () => {
           ))
         ) : (
           <p style={{ textAlign: 'center', color: 'var(--color-text-light)' }}>
-            Keine Dateien gefunden
+            Did not find any uploaded files.
           </p>
         )}
       </div>
@@ -469,10 +469,9 @@ const UploadPage: React.FC = () => {
       {/* Lösch-Bestätigungsdialog */}
       <div style={dialogOverlayStyles}>
         <div style={dialogStyles}>
-          <h3 style={{ color: '#4A3B76', marginTop: 0 }}>Datei löschen</h3>
+          <h3 style={{ color: '#4A3B76', marginTop: 0 }}>Delete file</h3>
           <p>
-            Möchten Sie wirklich die Datei <strong>{fileToDelete?.file_name}</strong> löschen? 
-            Dieser Vorgang kann nicht rückgängig gemacht werden.
+            Do you really want to delete the file <strong>{fileToDelete?.file_name}</strong>? This action cannot be undone.
           </p>
           <div style={dialogButtonsStyles}>
             <Button 

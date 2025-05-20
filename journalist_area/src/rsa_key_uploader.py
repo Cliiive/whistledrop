@@ -16,7 +16,7 @@ def get_public_keys():
     cursor = conn.cursor()
 
     # Nur die gewünschte Spalte abfragen
-    cursor.execute("SELECT public_key, id FROM schluesselpaare")
+    cursor.execute("SELECT public_key, id FROM schluesselpaare WHERE uploaded == False")
 
     # Alle Zeilen holen (jede ist ein Tupel mit einem Element)
     rows = cursor.fetchall()
@@ -25,7 +25,15 @@ def get_public_keys():
     public_keys = [row[0].encode("utf-8") if isinstance(row[0], str) else row[0] for row in rows]
     ids = [row[1] for row in rows]
     conn.close()
-    return public_keys, ids
+    return public_keys,ids
+
+def update_local_database():
+    conn = sqlite3.connect("../meine_datenbank.db")
+    cursor = conn.cursor()
+
+    cursor.execute("UPDATE schluesselpaare SET uploaded = True WHERE uploaded == False")
+    conn.commit()
+    conn.close()
 
 def create_temp_key_file(key, index, directory="temp_keys"):
     os.makedirs(directory, exist_ok=True)

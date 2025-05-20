@@ -1,3 +1,9 @@
+journalist_area/downloads
+journalist_area/decrypted_files
+journalist_area/meine_datenbank.db
+journalist_area/last_fetch.ini
+journalist_area/src/temp_keys
+
 backend/storage
 journalist_area/path
 journalist_area/temp_keys

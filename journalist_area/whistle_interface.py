@@ -1,28 +1,31 @@
 import argparse
 
 from src.rsa_key_generator import generate_multiple_keys, write_keys_to_database
-from src.rsa_key_uploader import get_public_keys, create_temp_key_file, upload_key_file
+from src.rsa_key_uploader import get_public_keys, create_temp_key_file, upload_key_file, update_local_database
 from src.clear_my_database import clear_everything
-import requests
+from src.fetch_all import start_fetching
 
 def upload(count: int, token: str):
 
     DEFAULT_SIZE = 2048
-    key = generate_multiple_keys(count=count, key_size=DEFAULT_SIZE)
+    key_list = generate_multiple_keys(count=count, key_size=DEFAULT_SIZE)
 
-    write_keys_to_database(keys=key)
+    write_keys_to_database(keys=key_list)
     print(count, "RSA Key(s) created ")
 
+    keys, ids = get_public_keys()
 
-    print(f"{len(key)} Found key.")
-    for index, k in enumerate(key):
-        filename = create_temp_key_file(k, index)
-        upload_key_file(filename)
+    print(f"{len(keys)} Found key.")
+    for index, key in enumerate(keys):
+        filename = create_temp_key_file(key, index)
+        upload_key_file(filename, ids[index])
 
     print("..und auf den Server hochgeladen")
 
+    update_local_database()
+
 def download():
-    print("noch implementieren")
+    start_fetching()
 
 def cleanup():
     clear_everything()
@@ -68,8 +71,7 @@ def main():
         token = authenticate_user()
         upload(args.count, token)
     elif args.command == "download":
-        print("download")
-        #download()
+        download()
     elif args.command == "cleanup":
         cleanup()
 
