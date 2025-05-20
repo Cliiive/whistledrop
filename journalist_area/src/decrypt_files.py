@@ -10,8 +10,8 @@ from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from base64 import b64decode
 import shutil
 
-DATABASE_PATH = "../meine_datenbank.db"
-DEFAULT_INPUT_DIR = "../downloads"
+DATABASE_PATH = "../../meine_datenbank.db"
+DEFAULT_INPUT_DIR = "../../downloads"
 DEFAULT_OUTPUT_DIR = "../decrypted_files"
 
 def load_private_key_from_db(public_key_id):
