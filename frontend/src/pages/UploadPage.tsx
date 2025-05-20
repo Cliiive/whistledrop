@@ -21,7 +21,7 @@ const UploadPage: React.FC = () => {
   const fetchUploadedFiles = async () => {
     try {
       const token = window.__WHISTLEDROP_AUTH_TOKEN__;
-      const response = await fetch('http://127.0.0.1:8000/api/v1/upload/', {
+      const response = await fetch('/api/v1/upload/', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -62,7 +62,7 @@ const UploadPage: React.FC = () => {
     try {
       const token = window.__WHISTLEDROP_AUTH_TOKEN__;
       // Vollständige URL für den Upload-Endpunkt
-      const response = await fetch('http://127.0.0.1:8000/api/v1/upload/', {
+      const response = await fetch('/api/v1/upload/', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -128,7 +128,7 @@ const UploadPage: React.FC = () => {
     setDeleting(true);
     try {
       const token = window.__WHISTLEDROP_AUTH_TOKEN__;
-      const response = await fetch(`http://127.0.0.1:8000/api/v1/upload/${fileToDelete.id}`, {
+      const response = await fetch(`/api/v1/upload/${fileToDelete.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
