@@ -94,9 +94,7 @@ def main():
 
 
     if args.command == "upload":
-
         token = authenticate_user()
-        print(token)
         upload(args.count, token)
     elif args.command == "download":
         token = authenticate_user()
