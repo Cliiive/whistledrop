@@ -31,8 +31,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-init_db()
-create_admin_account()
+# init_db()
+# create_admin_account()
 
 app.include_router(user_router, prefix=settings.API_PREFIX + "/user")
 app.include_router(upload_router, prefix=settings.API_PREFIX + "/upload")
