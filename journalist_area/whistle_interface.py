@@ -5,7 +5,11 @@ from src.rsa_key_uploader import get_public_keys, create_temp_key_file, upload_k
 from src.clear_my_database import clear_everything
 from src.fetch_all import start_fetching
 from src.decrypt_files import decrypt_all
+import dotenv
+import os
 import requests
+
+dotenv.load_dotenv()
 
 session = requests.Session()
 
@@ -15,7 +19,7 @@ session.proxies = {
     'https': 'socks5h://127.0.0.1:9150'
 }
 
-BASE_URL: str = "http://flmfe5vhq7aftlhg5kkz5o4xdsqezzly72soi5zomam3qfssre3z4oad.onion/api/v1"
+BASE_URL: str =  f"http://{os.getenv('ONION')}/api/v1"
 
 # Optional: Set a default timeout (via a wrapper function)
 def tor_get(url, **kwargs):
@@ -62,10 +66,10 @@ def authenticate_user():
     login_response = tor_post(auth_url, json={"passphrase": passphrase})
 
     if login_response.status_code != 200:
-        print("Login failed:", login_response.text)
-        return None
+        print("Authentication failed. Exiting.")
+        exit(0)
     else:
-        print("Login successful.")
+        print("Authentication successful.")
         return login_response.json()["access_token"]
 
 def main():
@@ -78,9 +82,10 @@ def main():
     # Upload
     upload_parser = subparsers.add_parser("upload", help="Creates & uploads all your public RSA keys to the server | Please specify the number of keys")
     upload_parser.add_argument("--count", type=int, default=1, help="Number of keys to generate (default: 1)")
-
+    upload_parser.add_argument("-d", help="Run in debug mode", action="store_true")
     # Download
     download_parser = subparsers.add_parser("download", help="Downloads all files from the server")
+    download_parser.add_argument("-d", help="Run in debug mode", action="store_true")
 
     # Cleanup
     cleanup_parser = subparsers.add_parser("cleanup", help="Deletes RSA keys, local database & local files")
@@ -89,6 +94,7 @@ def main():
 
 
     if args.command == "upload":
+
         token = authenticate_user()
         print(token)
         upload(args.count, token)
