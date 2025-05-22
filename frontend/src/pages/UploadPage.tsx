@@ -376,7 +376,7 @@ const UploadPage: React.FC = () => {
           loading={uploading}
           disabled={!selectedFile || uploading}
         >
-          {uploading ? 'Your file is beeing uploaded' : 'Upload file'}
+          {uploading ? 'Your file is beeing uploaded...' : 'Upload file'}
         </Button>
         
         {uploadSuccess && (

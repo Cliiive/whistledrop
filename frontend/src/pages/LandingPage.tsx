@@ -180,8 +180,54 @@ const LandingPage: React.FC = () => {
     marginTop: '1rem',
   };
 
+  // Styles für die kreisförmige Fortschrittsanzeige
+  const loaderOverlayStyles: React.CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  };
+
+  const spinnerStyles: React.CSSProperties = {
+    width: '60px',
+    height: '60px',
+    border: '5px solid rgba(155, 126, 229, 0.3)',
+    borderTop: '5px solid #9b7ee5',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+  };
+
+  // Keyframes für die Drehanimation werden im CSS definiert
+  React.useEffect(() => {
+    // Hinzufügen der Keyframes für die Drehanimation
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   return (
     <div style={containerStyles}>
+      {/* Ladeanimation Overlay */}
+      {isLoading && (
+        <div style={loaderOverlayStyles}>
+          <div style={spinnerStyles}></div>
+        </div>
+      )}
+      
       <div>
         <h1 style={headerStyles}>WhistleDrop</h1>
         <p style={subHeaderStyles}>Secure file exchange for whistleblower</p>
