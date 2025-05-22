@@ -24,7 +24,7 @@ from typing import Optional
 router = APIRouter()
 
 @router.get("/{id}")
-def download_file(
+async def download_file(
     id: UUID,
     db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_active_user),
@@ -63,7 +63,7 @@ def download_file(
     )
 
 @router.get("/new-files/")
-def download_new_files(
+async def download_new_files(
     since_date: str = Query(..., description="ISO formatted date (YYYY-MM-DD)"),
     db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_active_user),
