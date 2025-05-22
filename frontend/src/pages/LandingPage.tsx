@@ -238,9 +238,8 @@ const LandingPage: React.FC = () => {
           <div style={warningBoxStyles}>
             <p style={warningTextStyles}>⚠️ IMPORTANT</p>
             <p style={cautionTextStyles}>
-              This passphrase will only be shown once. Please save it securely.
-              If you lose it, you will not be able to access your files.
-
+              This passphrase will only be shown once. Please try to remember it and don't save it digitally or on any physical medium.
+              If you forget it, you will not be able to access your files anymore.
             </p>
           </div>
           
