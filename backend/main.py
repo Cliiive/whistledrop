@@ -55,8 +55,9 @@ if __name__ == "__main__":
         from app.db.session import create_admin_account
         create_admin_account(passphrase)
         print(f"Admin was created successfully.")
-    if "--init" in sys.argv and len(sys.argv) == 1:
+    if "--init" in sys.argv:
         init_db()
         print(f"database was initialized successfully.")
     else:
+        print("Normal start")
         uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)

@@ -69,7 +69,9 @@ def save_encrypted_file(db: Session, file_name: str, ciphertext: bytes, user_id:
                    symetrical_key_id=symetricla_key_id,
                    path=file_path,
                    file_name=file_name,
-                   content_type="application/pdf")
+                   content_type="application/pdf",
+                   seen=False
+                   )
 
     # Save the encrypted file to the database
     db.add(db_file)

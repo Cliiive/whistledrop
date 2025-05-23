@@ -45,6 +45,7 @@ class File(Base):
     file_name = Column(VARCHAR(255), nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
     content_type = Column(VARCHAR(100), nullable=False)
+    seen = Column(Boolean, nullable=False, default=False)  # Whether the file has been accessed
 
 class User(Base):
     """

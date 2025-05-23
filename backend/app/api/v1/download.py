@@ -137,7 +137,7 @@ async def download_new_files(
             
             if not aes_key:
                 continue  # Skip files without keys
-            
+
             # Add the file to the zip archive
             try:
                 with open(file.path, 'rb') as f:
@@ -147,6 +147,8 @@ async def download_new_files(
                 # Add key information in a text file
                 key_info = f"Encrypted Key: {aes_key.key}\nNonce: {aes_key.nonce}\nPublic Key ID: {aes_key.public_key_id}"
                 zip_file.writestr(f"{file.id}_key_info.txt", key_info)
+                file.seen = True
+                db.commit()
             except Exception as e:
                 # Log the error but continue with other files
                 print(f"Error adding file {file.id} to zip: {str(e)}")

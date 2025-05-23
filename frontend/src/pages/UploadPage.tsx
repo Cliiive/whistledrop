@@ -16,6 +16,16 @@ const UploadPage: React.FC = () => {
   useEffect(() => {
     // Beim Laden der Komponente die bereits hochgeladenen Dateien abrufen
     fetchUploadedFiles();
+
+    // Polling-Mechanismus einrichten, der alle 5 Sekunden nach Updates sucht
+    const pollingInterval = setInterval(() => {
+      fetchUploadedFiles();
+    }, 5000); // 5000ms = 5 Sekunden
+
+    // Aufräumen beim Unmounten der Komponente
+    return () => {
+      clearInterval(pollingInterval);
+    };
   }, []);
 
   const fetchUploadedFiles = async () => {
@@ -417,7 +427,37 @@ const UploadPage: React.FC = () => {
                 <span>{file.file_name}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center' }}>
+
+                {/* Eye icon for seen files */}
+                {file.seen && (
+                  <div
+                    style={{
+                      marginLeft: '0.75rem',
+                      marginRight: '0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      color: 'var(--color-success)',
+                    }}
+                    title="Your file has been downloaded by the journalist"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </div>
+                )}
                 <span>{new Date(file.created_at).toLocaleString('us-US', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+
                 {/* Lösch-Button */}
                 <button
                   onClick={() => handleDeleteClick(file)}
@@ -497,3 +537,4 @@ const UploadPage: React.FC = () => {
 };
 
 export default UploadPage;
+
