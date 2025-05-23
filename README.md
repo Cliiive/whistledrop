@@ -51,6 +51,8 @@ docker-compose run backend python main.py --init
 docker-compose run backend python main.py --createadmin your_secure_passphrase
 ```
 
+be catious with the --init command, it will reinitialise your database, so only run it if you are sure.
+
 ### Start the Application
 
 Start all containers:
