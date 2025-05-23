@@ -1,0 +1,15 @@
+# Core dependencies
+requests>=2.28.0
+requests[socks]>=2.28.0  # For Tor connectivity
+python-dotenv>=1.0.0     # For .env file handling
+
+# Database connections
+psycopg2-binary>=2.9.5   # PostgreSQL adapter
+
+# Cryptography
+cryptography>=41.0.0     # For RSA encryption/decryption
+
+# Optional but recommended
+pycparser>=2.21          # Dependency for cryptography
+certifi>=2023.7.22       # For secure connections
+urllib3>=1.26.16         # Used by requests
