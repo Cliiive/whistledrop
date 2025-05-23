@@ -1,4 +1,7 @@
-# endpont for the journalist to download files
+"""
+API endpoints for journalists to download encrypted files.
+Provides secure access to whistleblower submissions.
+"""
 import uuid
 from datetime import datetime
 import zipfile
@@ -29,7 +32,21 @@ async def download_file(
     db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_active_user),
 ):
-    # check if current user is admin
+    """
+    Download a specific encrypted file by ID.
+    
+    Args:
+        id: UUID of the file to download
+        db: Database session
+        current_user: Authenticated user (must be admin)
+        
+    Returns:
+        The encrypted file with encryption key information in headers
+        
+    Raises:
+        HTTPException: If user lacks permission or file is not found
+    """
+    # Check if current user is admin
     if not current_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -45,7 +62,7 @@ async def download_file(
         )
 
     aes_key: SymmetricalKey = db.query(db_models.SymmetricalKey).filter(db_models.SymmetricalKey.id == file.symetrical_key_id).first()
-    # return the file
+    # Return the file
     if not aes_key:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -57,8 +74,8 @@ async def download_file(
         filename=file.file_name,
         media_type=file.content_type,
         headers={
-            "X-Encrypted-Key": aes_key.key,  # Schlüssel im Header
-            "X-Public-Key-ID": str(aes_key.public_key_id)  # Public Key ID im Header
+            "X-Encrypted-Key": aes_key.key,  # Key in header
+            "X-Public-Key-ID": str(aes_key.public_key_id)  # Public Key ID in header
         }
     )
 
@@ -68,7 +85,21 @@ async def download_new_files(
     db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_active_user),
 ):
-    # check if current user is admin
+    """
+    Download all new files since a specified date as a zip archive.
+    
+    Args:
+        since_date: ISO format date string (YYYY-MM-DD)
+        db: Database session
+        current_user: Authenticated user (must be admin)
+        
+    Returns:
+        Zip file containing all new encrypted files and their key information
+        
+    Raises:
+        HTTPException: If user lacks permission, date format is invalid, or no files found
+    """
+    # Check if current user is admin
     if not current_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

@@ -1,3 +1,7 @@
+"""
+API endpoint for uploading RSA public keys.
+Allows administrators to add public keys that will be used for encryption.
+"""
 import uuid
 
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status
@@ -21,10 +25,23 @@ def upload_public_keys(
     id: UUID,
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_active_user),
-
     db: Session = Depends(get_user_db) # type: ignore
 ):
-
+    """
+    Upload a public RSA key for file encryption.
+    
+    Args:
+        id: UUID for the public key
+        file: The PEM file containing the public key
+        current_user: Authenticated user (must be admin)
+        db: Database session
+        
+    Returns:
+        Success message
+        
+    Raises:
+        HTTPException: If user lacks permission or file format is invalid
+    """
     if not current_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -36,11 +53,11 @@ def upload_public_keys(
     if file.content_type not in valid_pem_types:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Nur PEM-Dateien sind erlaubt. Unterstützte Formate: PEM-Datei, X.509-Zertifikat"
+            detail="Only PEM files are allowed. Supported formats: PEM file, X.509 certificate"
         )
 
     print(id)
-    # insert the key into the public_keys table
+    # Insert the key into the public_keys table
     key = db_models.PublicKey(id=id, active=True, key=file.file.read())
     db.add(key)
     db.commit()
@@ -49,4 +66,3 @@ def upload_public_keys(
     return {
         "message": "success",
     }
-

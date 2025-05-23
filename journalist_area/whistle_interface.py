@@ -45,7 +45,7 @@ def upload(count: int, token: str):
         filename = create_temp_key_file(key, index)
         upload_key_file(filename, token, tor_post, ids[index])
 
-    print("..und auf den Server hochgeladen")
+    print("..and uploaded to server")
 
     update_local_database()
 
@@ -54,7 +54,7 @@ def download(token: str):
 
 def cleanup():
     clear_everything()
-    print("Es wurde alles gelöscht")
+    print("Everything has been deleted")
 
 def authenticate_user():
     passphrase = input("Please enter your passphrase: ")

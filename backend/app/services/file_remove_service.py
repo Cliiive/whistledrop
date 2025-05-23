@@ -1,3 +1,7 @@
+"""
+File removal service for deleting uploaded files.
+Handles both database record deletion and file system cleanup.
+"""
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -9,7 +13,13 @@ from fastapi import UploadFile
 
 def delete_file_from_storage(file_path: str):
     """
-    Deletes the file at the given path.
+    Delete a file from the file system.
+    
+    Args:
+        file_path: Path to the file to be deleted
+        
+    Returns:
+        Boolean indicating success or failure
     """
     print(file_path)
     print(os.path.exists("/app"))
@@ -21,7 +31,14 @@ def delete_file_from_storage(file_path: str):
 
 def delete_file_from_db(db: Session, file_id: UUID):
     """
-    Deletes the file from the database.
+    Delete a file record from the database.
+    
+    Args:
+        db: Database session
+        file_id: UUID of the file to delete
+        
+    Returns:
+        Boolean indicating success or failure
     """
     db_file = db.query(File).filter(File.id == file_id).first()
 

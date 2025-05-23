@@ -1,3 +1,7 @@
+"""
+Authentication module for JWT token generation and validation.
+Provides functions to create and verify access tokens for users.
+"""
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -12,10 +16,20 @@ from app.core.config import settings
 import os
 
 
-# Cookie-basierter Zugriffstoken-Handler (statt OAuth2PasswordBearer)
+# OAuth2PasswordBearer
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    """
+    Create a JWT access token for authentication.
+    
+    Args:
+        data: Data to encode into the token (typically includes user ID)
+        expires_delta: Optional expiration time delta, defaults to settings value
+        
+    Returns:
+        Encoded JWT token string
+    """
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
@@ -24,9 +38,22 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 
 def get_current_user(token: str = Security(oauth2_scheme), db: Session = Depends(get_db_session)) -> User:
+    """
+    Get the current user from a JWT token.
+    
+    Args:
+        token: JWT token string
+        db: Database session
+        
+    Returns:
+        User object if authentication is successful
+        
+    Raises:
+        HTTPException: If token is invalid or user doesn't exist
+    """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Ungültiger Authentifizierungstoken",
+        detail="Invalid authentication token",
         headers={"WWW-Authenticate": "Bearer"},
     )
 
@@ -47,6 +74,19 @@ def get_current_user(token: str = Security(oauth2_scheme), db: Session = Depends
     return user
 
 def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
+    """
+    Get the current active user.
+    Currently just passes through the user without checking active status.
+    
+    Args:
+        current_user: User object from get_current_user
+        
+    Returns:
+        User object if active
+        
+    Raises:
+        HTTPException: If user is not active (commented out currently)
+    """
     # if not current_user.is_active:
     #     raise HTTPException(
     #         status_code=status.HTTP_400_BAD_REQUEST,

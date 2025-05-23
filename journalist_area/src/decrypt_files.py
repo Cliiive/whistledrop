@@ -15,7 +15,7 @@ DEFAULT_INPUT_DIR = "../downloads"
 DEFAULT_OUTPUT_DIR = "../decrypted_files"
 
 def load_private_key_from_db(public_key_id):
-    """Lädt den privaten Schlüssel aus der Datenbank basierend auf der ID."""
+    """Loads the private key from the database based on the ID."""
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     
@@ -28,7 +28,7 @@ def load_private_key_from_db(public_key_id):
     conn.close()
 
     if not result:
-        raise ValueError(f"Kein privater Schlüssel für ID {public_key_id} gefunden!")
+        raise ValueError(f"No private key found for ID {public_key_id}!")
     
     private_key_pem = result[0]
     private_key = load_pem_private_key(
@@ -40,19 +40,19 @@ def load_private_key_from_db(public_key_id):
 
 
 def decrypt_aes_key(encrypted_key, private_key):
-    """Entschlüsselt einen AES-Schlüssel mit einem privaten RSA-Schlüssel."""
+    """Decrypts an AES key with a private RSA key."""
     try:
-        # Entferne alle Whitespaces und Zeilenumbrüche
+        # Remove all whitespaces and line breaks
 
-        # Base64-decodieren des verschlüsselten Schlüssels
+        # Base64-decode the encrypted key
         encrypted_key_bytes = b64decode(encrypted_key)
-        # Prüfe Längen
+        # Check lengths
         key_size_bytes = private_key.key_size // 8
         if len(encrypted_key_bytes) != key_size_bytes:
             print(
-                f"Warnung: Ciphertext-Länge ({len(encrypted_key_bytes)}) stimmt nicht mit Schlüsselgröße ({key_size_bytes}) überein")
+                f"Warning: Ciphertext length ({len(encrypted_key_bytes)}) does not match key size ({key_size_bytes})")
 
-        # Entschlüsseln des AES-Schlüssels mit dem privaten RSA-Schlüssel
+        # Decrypt the AES key with the private RSA key
         decrypted_key = private_key.decrypt(
             encrypted_key_bytes,
             padding.OAEP(
@@ -64,114 +64,114 @@ def decrypt_aes_key(encrypted_key, private_key):
 
         return decrypted_key
     except Exception as e:
-        print(f"Fehler beim Entschlüsseln des AES-Schlüssels: {e}")
+        print(f"Error decrypting AES key: {e}")
         raise
 
 def decrypt_file(encrypted_file_path, aes_key, nonce, output_file_path):
-    """Entschlüsselt eine Datei mit AES-GCM."""
+    """Decrypts a file with AES-GCM."""
     try:
-        # Lese die verschlüsselte Datei
+        # Read the encrypted file
         with open(encrypted_file_path , 'rb') as file:
             encrypted_data = file.read()
         
-        # Entschlüsseln mit AES-GCM
+        # Decrypt with AES-GCM
         aesgcm = AESGCM(aes_key)
         decrypted_data = aesgcm.decrypt(nonce, encrypted_data, None)
         
-        # Schreibe die entschlüsselte Datei
+        # Write the decrypted file
         with open(output_file_path, 'wb') as file:
             file.write(decrypted_data)
             
         return True
     except Exception as e:
-        print(f"Fehler beim Entschlüsseln von {encrypted_file_path}: {str(e)}")
+        print(f"Error decrypting {encrypted_file_path}: {str(e)}")
         return False
 
 def process_files(input_dir, output_dir):
-    """Verarbeitet alle Dateien im Eingabeverzeichnis."""
-    # Stelle sicher, dass das Ausgabeverzeichnis existiert
+    """Processes all files in the input directory."""
+    # Ensure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
     
-    # Finde alle Dateipaare (Datei und dazugehörige key_info.txt)
+    # Find all file pairs (file and associated key_info.txt)
     success_count = 0
     error_count = 0
     
-    # Sammle alle Dateien ohne die key_info.txt-Dateien
+    # Collect all files without the key_info.txt files
     files = [f for f in os.listdir(input_dir) 
              if os.path.isfile(os.path.join(input_dir, f)) and not f.endswith('_key_info.txt')]
     
     for filename in files:
         try:
             file_path = os.path.join(input_dir, filename)
-            file_id = filename.split('_')[0]  # Extrahiere die Datei-ID
+            file_id = filename.split('_')[0]  # Extract the file ID
             key_info_path = os.path.join(input_dir, f"{file_id}_key_info.txt")
             
             if not os.path.exists(key_info_path):
-                print(f"Schlüsselinfo für {filename} nicht gefunden!")
+                print(f"Key info for {filename} not found!")
                 error_count += 1
                 continue
             
-            # Lese die Schlüsselinfos
+            # Read the key info
             with open(key_info_path, 'r') as key_file:
                 key_info = key_file.read()
             
-            # Extrahiere verschlüsselten Schlüssel und Public Key ID
+            # Extract encrypted key and Public Key ID
             key_lines = key_info.split('\n')
             encrypted_key = key_lines[0].replace("Encrypted Key: ", "")
             nonce = key_lines[1].replace("Nonce: ", "")
             public_key_id = key_lines[2].replace("Public Key ID: ", "")
-            # Hier beginnt der spezielle Teil für SQLite
-            # Lade den privaten Schlüssel
+            # Here begins the special part for SQLite
+            # Load the private key
             private_key = load_private_key_from_db(public_key_id)
 
-            # Sichere Alternative zu eval() für Strings, die Python-Literale enthalten
+            # Safe alternative to eval() for strings containing Python literals
             import ast
             try:
                 encrypted_key = ast.literal_eval(encrypted_key)
                 nonce = ast.literal_eval(nonce)
             except (ValueError, SyntaxError) as e:
-                print(f"Fehler beim Parsen der Schlüsseldaten: {e}")
+                print(f"Error parsing key data: {e}")
                 raise
 
-            # Entschlüssele den AES-Schlüssel
+            # Decrypt the AES key
             aes_key = decrypt_aes_key(encrypted_key, private_key)
-            print(f"Entschlüsselter AES-Schlüssel: {aes_key}")
-            # Erzeuge den Ausgabepfad
+            print(f"Decrypted AES key: {aes_key}")
+            # Create the output path
             original_filename = '_'.join(filename.split('_')[1:])
             output_file_path = os.path.join(output_dir, original_filename)
             
-            # Entschlüssele die Datei
+            # Decrypt the file
             if decrypt_file(file_path, aes_key, nonce, output_file_path + ".pdf"):
                 success_count += 1
-                print(f"Datei erfolgreich entschlüsselt: {output_file_path}")
+                print(f"File successfully decrypted: {output_file_path}")
             else:
                 error_count += 1
         
         except Exception as e:
-            print(f"Fehler bei Verarbeitung von {filename}: {str(e)}")
+            print(f"Error processing {filename}: {str(e)}")
             error_count += 1
     
-    print(f"\nZusammenfassung:")
-    print(f"Erfolgreich entschlüsselt: {success_count} Dateien")
-    print(f"Fehler: {error_count} Dateien")
+    print(f"\nSummary:")
+    print(f"Successfully decrypted: {success_count} files")
+    print(f"Errors: {error_count} files")
     return success_count, error_count
 
 def decrypt_all():
-    # parser = argparse.ArgumentParser(description="Entschlüsselt Dateien mit RSA-privaten Schlüsseln und AES.")
+    # parser = argparse.ArgumentParser(description="Decrypts files with RSA private keys and AES.")
     #
     # parser.add_argument(
     #     "-i", "--input",
     #     default=DEFAULT_INPUT_DIR,
-    #     help=f"Eingabeverzeichnis mit verschlüsselten Dateien (Standard: {DEFAULT_INPUT_DIR})"
+    #     help=f"Input directory with encrypted files (default: {DEFAULT_INPUT_DIR})"
     # )
     #
     # parser.add_argument(
     #     "-o", "--output",
     #     default=DEFAULT_OUTPUT_DIR,
-    #     help=f"Ausgabeverzeichnis für entschlüsselte Dateien (Standard: {DEFAULT_OUTPUT_DIR})"
+    #     help=f"Output directory for decrypted files (default: {DEFAULT_OUTPUT_DIR})"
     # )
     #
     # args = parser.parse_args()
     #
-    print(f"Entschlüssele Dateien aus ./downloads nach ./decrypted_files")
+    print(f"Decrypting files from ./downloads to ./decrypted_files")
     process_files(DEFAULT_INPUT_DIR, DEFAULT_OUTPUT_DIR)

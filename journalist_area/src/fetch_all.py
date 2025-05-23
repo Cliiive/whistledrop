@@ -15,7 +15,7 @@ DOWNLOAD_FOLDER = os.getenv("DOWNLOAD_FOLDER", "../downloads")
 
 CONFIG_FILE = "../last_fetch.ini"
 
-# Hilfsfunktion zum Formatieren von Datum/Zeit
+# Helper function for formatting date/time
 def format_datetime(dt):
     # add one second to the datetime object
     if isinstance(dt, datetime):
@@ -24,13 +24,13 @@ def format_datetime(dt):
         return dt.strftime('%Y-%m-%d %H:%M:%S')
     return None
 
-# Hilfsfunktion zum Parsen von Datum/Zeit-Strings
+# Helper function for parsing date/time strings
 def parse_datetime(dt_str):
     if dt_str:
         return datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
     return None
 
-# Lese das letzte Abrufdatum aus der INI-Datei
+# Read the last fetch date from the INI file
 def get_last_fetch_date():
     config = configparser.ConfigParser()
     
@@ -41,7 +41,7 @@ def get_last_fetch_date():
     
     return None
 
-# Speichere das neueste Abrufdatum in der INI-Datei
+# Save the latest fetch date to the INI file
 def save_last_fetch_date(last_date):
     config = configparser.ConfigParser()
     
@@ -56,20 +56,20 @@ def save_last_fetch_date(last_date):
     with open(CONFIG_FILE, 'w') as configfile:
         config.write(configfile)
 
-# Stelle sicher, dass der Download-Ordner existiert
+# Ensure that the download folder exists
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 def start_fetching(token, tor_get):
-    # Hole das letzte Abrufdatum
+    # Get the last fetch date
     last_fetch_date = get_last_fetch_date()
     
-    # Wenn kein letztes Abrufdatum vorhanden ist, setzen wir es auf ein frühes Datum
+    # If no last fetch date is available, we set it to an early date
     if not last_fetch_date:
         print("No previous fetch date found. Will fetch all files.")
-        # ISO Format für das API: YYYY-MM-DD
+        # ISO Format for the API: YYYY-MM-DD
         fetch_date_for_api = "2000-01-01"
     else:
-        # Konvertiere das gespeicherte Datum ins ISO-Format für die API
+        # Convert the saved date to ISO format for the API
         parsed_date = parse_datetime(last_fetch_date)
         fetch_date_for_api = parsed_date.strftime('%Y-%m-%d')
         print(f"Fetching files newer than {fetch_date_for_api}")
@@ -78,30 +78,30 @@ def start_fetching(token, tor_get):
         "Authorization": f"Bearer {token}"
     }
 
-    # API-Anfrage senden
+    # Send API request
     response = tor_get(
         f"/download/new-files/?since_date={fetch_date_for_api}",
         headers=headers
     )
     
-    # Fehlerbehandlung
+    # Error handling
     if response.status_code == 404:
         print("No new files found since the specified date")
     elif response.status_code != 200:
         print(f"Error fetching files: {response.status_code} - {response.text}")
     else:
-        # Extrahiere die ZIP-Datei
+        # Extract the ZIP file
         with zipfile.ZipFile(io.BytesIO(response.content)) as zip_ref:
-            # Liste der Dateien, die wir extrahieren
+            # List of files we extract
             file_list = zip_ref.namelist()
             print(f"Found {len([f for f in file_list if not f.endswith('_key_info.txt')])} new file(s)")
             
-            # Extrahiere alle Dateien
+            # Extract all files
             zip_ref.extractall(DOWNLOAD_FOLDER)
             
             print(f"All files have been downloaded to {DOWNLOAD_FOLDER}")
         
-        # Aktualisiere das Datum auf heute
+        # Update the date to today
         current_date = format_datetime(datetime.now())
         save_last_fetch_date(current_date)
         print(f"Updated last fetch date to {current_date}")

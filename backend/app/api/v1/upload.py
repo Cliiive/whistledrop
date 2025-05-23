@@ -1,3 +1,7 @@
+"""
+API endpoints for file upload operations.
+Handles secure file uploads, file listings, and file deletion.
+"""
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status
 from uuid import UUID
 from sqlalchemy.orm import Session
@@ -19,14 +23,27 @@ async def upload_file(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_user_db) # type: ignore
 ):
+    """
+    Upload and encrypt a file securely.
+    
+    Args:
+        file: The file to upload
+        current_user: Authenticated user
+        db: Database session
+        
+    Returns:
+        Success message
+        
+    Raises:
+        HTTPException: If file type is not allowed or encryption fails
+        FileTypeNotAllowed: If file type is not supported
+    """
     # Check if the file type is allowed
     if not allowed_type(file):
         raise FileTypeNotAllowed()
 
-    # Check if the file size is within the limit
-
     # TODO: Error handling -> what if the pdf is saved but the key is not?
-    # handle encryption + storage
+    # Handle encryption + storage
     result = encrypt_pdf(file)
 
     try:
@@ -43,12 +60,21 @@ async def upload_file(
 
     return {"message": "success"}
 
-# return a list of files the user has uploaded
 @router.get("/")
 async def get_files(
     db: Session = Depends(get_user_db),
     current_user: User = Depends(get_current_active_user)
 ):
+    """
+    Retrieve a list of files uploaded by the current user.
+    
+    Args:
+        db: Database session
+        current_user: Authenticated user
+        
+    Returns:
+        List of files belonging to the user
+    """
     files = db.query(db_models.File).filter(db_models.File.user_id == current_user.id).all()
     return files
 
@@ -58,6 +84,20 @@ async def delete_file(
     db: Session = Depends(get_user_db),
     current_user: User = Depends(get_current_active_user)
 ):
+    """
+    Delete a file by ID.
+    
+    Args:
+        id: UUID of the file to delete
+        db: Database session
+        current_user: Authenticated user
+        
+    Returns:
+        Success message
+        
+    Raises:
+        HTTPException: If file not found, user lacks permission, or deletion fails
+    """
     # Check if the file exists
     file: File = db.query(db_models.File).filter(db_models.File.id == id).first()
     if not file:
@@ -88,4 +128,3 @@ async def delete_file(
     return {
         "message": "File deleted successfully"
     }
-

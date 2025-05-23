@@ -1,4 +1,7 @@
-# backend/app/services/auth_service.py
+"""
+Authentication service for user validation and creation.
+Handles passphrase verification and user registration.
+"""
 from sqlalchemy.orm import Session
 from app.models.models import User
 from app.core.security import verify_passphrase, hash_passphrase, generate_passphrase
@@ -6,7 +9,17 @@ from app.core.security import verify_passphrase, hash_passphrase, generate_passp
 import uuid
 
 def authenticate_user(db: Session, passphrase: str):
-    # Alle Benutzer abrufen
+    """
+    Authenticate a user with the provided passphrase.
+    
+    Args:
+        db: Database session
+        passphrase: Plaintext passphrase to verify
+        
+    Returns:
+        User object if authenticated, None otherwise
+    """
+    # Retrieve all users
     users = db.query(User).all()
     for user in users:
         if user.passphrase_hash and verify_passphrase(passphrase, user.passphrase_hash):
@@ -16,11 +29,19 @@ def authenticate_user(db: Session, passphrase: str):
 
 
 def create_user(db: Session):
-    """Erstellt einen neuen Benutzer mit einer generierten Seed-Phrase."""
-    # Generiere eine Seed-Phrase
+    """
+    Create a new user with a generated passphrase.
+    
+    Args:
+        db: Database session
+        
+    Returns:
+        Tuple of (user object, plaintext passphrase)
+    """
+    # Generate a passphrase
     passphrase = generate_passphrase()
 
-    # Erstelle einen neuen Benutzer
+    # Create a new user
     user = User(
         id=uuid.uuid4(),
         passphrase_hash=hash_passphrase(passphrase)
@@ -30,5 +51,5 @@ def create_user(db: Session):
     db.commit()
     db.refresh(user)
 
-    # Gib den Benutzer und die passphrase zurück
+    # Return the user and passphrase
     return user, passphrase
