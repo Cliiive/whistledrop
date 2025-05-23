@@ -8,6 +8,7 @@ backend/storage
 journalist_area/path
 journalist_area/temp_keys
 journalist_area/meine_datenbank.db
+journalist_area/config.ini
 
 tor-data
 

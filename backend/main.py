@@ -39,3 +39,24 @@ app.include_router(upload_router, prefix=settings.API_PREFIX + "/upload")
 app.include_router(auth_router, prefix=settings.API_PREFIX + "/auth")
 app.include_router(public_key_router, prefix=settings.API_PREFIX + "/publickey")
 app.include_router(download_router, prefix=settings.API_PREFIX + "/download")
+
+if __name__ == "__main__":
+    import sys
+    import uvicorn
+
+    if "--createadmin" in sys.argv:
+        idx = sys.argv.index("--createadmin")
+        try:
+            passphrase = sys.argv[idx + 1]
+        except IndexError:
+            print("ussage: --createadmin <passphrase>")
+            sys.exit(1)
+
+        from app.db.session import create_admin_account
+        create_admin_account(passphrase)
+        print(f"Admin was created successfully.")
+    if "--init" in sys.argv and len(sys.argv) == 1:
+        init_db()
+        print(f"database was initialized successfully.")
+    else:
+        uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)

@@ -11,7 +11,7 @@ DATABASE_URL_ADMIN = os.getenv("DATABASE_REMOTE_URL_ADMIN")
 
 
 def get_public_keys():
-    conn = sqlite3.connect("../meine_datenbank.db")
+    conn = sqlite3.connect("./meine_datenbank.db")
     cursor = conn.cursor()
 
     # Query only the desired column
@@ -27,7 +27,7 @@ def get_public_keys():
     return public_keys,ids
 
 def update_local_database():
-    conn = sqlite3.connect("../meine_datenbank.db")
+    conn = sqlite3.connect("./meine_datenbank.db")
     cursor = conn.cursor()
 
     cursor.execute("UPDATE schluesselpaare SET uploaded = True WHERE uploaded == False")

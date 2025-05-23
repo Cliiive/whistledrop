@@ -2,10 +2,10 @@ import os
 import shutil  # <- needed for directories
 
 def clear_everything():
-    local_database_path = "../meine_datenbank.db"
+    local_database_path = "./meine_datenbank.db"
     public_keys_path = "./temp_keys"
-    local_files_path = "../downloads"
-    decrypted_files_path = "../decrypted_files"
+    local_files_path = "./downloads"
+    decrypted_files_path = "./decrypted_files"
 
     if os.path.exists(local_database_path):
         os.remove(local_database_path)

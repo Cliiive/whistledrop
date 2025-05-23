@@ -1,5 +1,6 @@
 import argparse
 
+from src.config import add_onion_to_config
 from src.rsa_key_generator import generate_multiple_keys, write_keys_to_database
 from src.rsa_key_uploader import get_public_keys, create_temp_key_file, upload_key_file, update_local_database
 from src.clear_my_database import clear_everything
@@ -8,10 +9,18 @@ from src.decrypt_files import decrypt_all
 import dotenv
 import os
 import requests
+import configparser
 
 dotenv.load_dotenv()
 
 session = requests.Session()
+
+# Create config parser
+config = configparser.ConfigParser()
+
+# Read existing config if file exists
+if os.path.exists('./config.ini'):
+    config.read('./config.ini')
 
 # Set default proxy (e.g., for Tor)
 session.proxies = {
@@ -19,10 +28,11 @@ session.proxies = {
     'https': 'socks5h://127.0.0.1:9150'
 }
 
-BASE_URL: str =  f"http://{os.getenv('ONION')}/api/v1"
+BASE_URL: str = f"http://{config['Tor']['Onion'] if os.path.exists('./config.ini') and 'Tor' in config and 'Onion' in config['Tor'] else 'localhost'}/api/v1"
 
 # Optional: Set a default timeout (via a wrapper function)
 def tor_get(url, **kwargs):
+    # print(BASE_URL)
     return session.get(BASE_URL + url, timeout=30, **kwargs)
 
 # Optional: Set a default timeout (via a wrapper function)
@@ -87,6 +97,10 @@ def main():
     download_parser = subparsers.add_parser("download", help="Downloads all files from the server")
     download_parser.add_argument("-d", help="Run in debug mode", action="store_true")
 
+    config_parser = subparsers.add_parser("config", help="Configure your whistledrop interface")
+    config_parser.add_argument("--onion", help="add your onion adress", type=str)
+    config_parser.add_argument("--gensecret", help="generates a secure JWT auth secret for you", action="store_true")
+
     # Cleanup
     cleanup_parser = subparsers.add_parser("cleanup", help="Deletes RSA keys, local database & local files")
 
@@ -102,6 +116,15 @@ def main():
         decrypt_all()
     elif args.command == "cleanup":
         cleanup()
+    elif args.command == "config":
+        if args.onion:
+            add_onion_to_config(args.onion, 'config.ini')
+        elif args.gensecret:
+            import src.generate_auth_secret as generate_auth_secret
+            print(f"Your JWT-Auth secret: {generate_auth_secret.generate_auth_secret()}")
+            print(f"Copy it to your .env file as AUTH_SECRET. Do not share it with anyone.")
+        else:
+            print("No onion address provided. Please use --onion to set it.")
 
 
 if __name__ == "__main__":

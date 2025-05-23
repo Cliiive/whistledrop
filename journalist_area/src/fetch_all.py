@@ -11,9 +11,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DOWNLOAD_FOLDER = os.getenv("DOWNLOAD_FOLDER", "../downloads")
+DOWNLOAD_FOLDER = os.getenv("DOWNLOAD_FOLDER", "./downloads")
 
-CONFIG_FILE = "../last_fetch.ini"
+CONFIG_FILE = "./config.ini"
 
 # Helper function for formatting date/time
 def format_datetime(dt):

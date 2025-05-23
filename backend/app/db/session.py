@@ -87,7 +87,7 @@ def init_db():
     finally:
         conn.close()
 
-def create_admin_account():
+def create_admin_account(passphrase):
     """
     Create an administrator account in the database.
     Uses the admin password from environment variables.
@@ -96,7 +96,7 @@ def create_admin_account():
 
     try:
         # Create admin account
-        admin_password = os.getenv("POSTGRES_ADMIN_PASSWORD")
+        admin_password = passphrase
         hashed_password = hash_passphrase(admin_password)
         conn.execute(text(f"INSERT INTO users (id, passphrase_hash, is_admin) VALUES ('{uuid.uuid4()}', '{hashed_password}', true);"))
         conn.commit()

@@ -44,7 +44,7 @@ def generate_multiple_keys(count: int, key_size: int):
 
 def write_keys_to_database(keys: list):
     # Connection to SQLite database (file is created if it doesn't exist)
-    conn = sqlite3.connect("../meine_datenbank.db")
+    conn = sqlite3.connect("./meine_datenbank.db")
     cursor = conn.cursor()
 
     # Create table
