@@ -11,6 +11,8 @@ import uuid
 import os
 from fastapi import UploadFile
 from app.core.config import settings
+from PyPDF2 import PdfReader, PdfWriter
+import io, os
 
 class EncryptedFileResult(BaseModel):
     """
@@ -22,23 +24,41 @@ class EncryptedFileResult(BaseModel):
     nonce: bytes
     key: bytes
 
+
 def encrypt_pdf(file: UploadFile) -> EncryptedFileResult:
     """
     Encrypt a PDF file using AES-GCM.
-    
+
     Args:
         file: Uploaded file to encrypt
-        
+
     Returns:
         EncryptedFileResult containing ciphertext and encryption parameters
     """
     key = AESGCM.generate_key(256)
     aesgcm = AESGCM(key)
-    plaintext = file.file.read()
+
+    # Read uploaded file into memory (nur einmal lesen)
+    original_bytes = file.file.read()
+
+    # Step 1: Remove metadata safely using PyPDF2
+    input_pdf = PdfReader(io.BytesIO(original_bytes))
+    output_pdf = PdfWriter()
+
+    for page in input_pdf.pages:
+        output_pdf.add_page(page)
+
+    output_pdf.add_metadata({})  # remove all metadata
+
+    # Step 2: Write cleaned PDF to memory
+    cleaned_pdf_io = io.BytesIO()
+    output_pdf.write(cleaned_pdf_io)
+    cleaned_pdf_io.seek(0)
+    cleaned_bytes = cleaned_pdf_io.read()
 
     nonce = os.urandom(12)
 
-    ciphertext = aesgcm.encrypt(nonce, plaintext, associated_data=None)
+    ciphertext = aesgcm.encrypt(nonce, cleaned_bytes, associated_data=None)
 
     return EncryptedFileResult(
         file_name=file.filename,
@@ -206,3 +226,5 @@ def insert_random_user(db: Session) -> UUID:
     db.refresh(user)
     print(f"Inserted random user with ID {user.id}")
     return user.id
+
+
