@@ -1,7 +1,5 @@
 # WhistleDrop
-
-
-
+## Created by Hackintosh 102x
 A secure whistleblower system that enables encrypted communication between whistleblowers and journalists through the Tor network with end-to-end encryption using asymmetric RSA encryption.
 
 ## System Requirements
